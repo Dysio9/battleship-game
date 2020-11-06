@@ -1,0 +1,10 @@
+# Default ignored files
+**/.gradle/
+**/build/
+
+# InteliliJ IDEA
+**/out/
+**/.idea/
+*.iws
+*.iml
+*.ipr

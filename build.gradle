@@ -1,0 +1,26 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
+}
+
+group 'pl.dysio9'
+version '1.0-SNAPSHOT'
+mainClassName = 'pl.dysio9.battleship.BattleshipGame'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+
+
+// Build normally: gradle build (I've added to /home/dysio9/.gradle/gradle.properties path to java-11-oracle
+// Build with:  gradle build -Dorg.gradle.java.home=/usr/lib/jvm/java-11-oracle
