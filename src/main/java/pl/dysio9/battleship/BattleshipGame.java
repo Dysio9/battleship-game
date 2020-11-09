@@ -1,7 +1,6 @@
 package pl.dysio9.battleship;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -11,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -19,23 +17,23 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BattleshipGame extends Application {
     private int totalScorePlayer = 0;
     private int totalScoreOpponent = 0;
-    private Map<Cell, Ship> playerShips = new HashMap<>();
-    private Map<Cell, Ship> opponentShips = new HashMap<>();
+    private Controller controller = Controller.getInstance();
+    private Map<Cell, Ship> playerShips = controller.getPlayerShips();
+    private Map<Cell, Ship> opponentShips = controller.getOpponentShips();
 
     private Image imageback = new Image("file:src/main/resources/background2.png");
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
     private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
     private Image ship2mast = new Image("file:src/main/resources/ship2mast.png");
     private Image ship1mast = new Image("file:src/main/resources/ship1mast.png");
-    private Image ship4mastSinked = new Image("file:src/main/resources/ship4mast-sunk.png");
-    private Image ship3mastSinked = new Image("file:src/main/resources/ship3mast-sunk.png");
-    private Image ship2mastSinked = new Image("file:src/main/resources/ship2mast-sunk.png");
-    private Image ship1mastSinked = new Image("file:src/main/resources/ship1mast-sunk.png");
+    private Image ship4mastSunk = new Image("file:src/main/resources/ship4mast-sunk.png");
+    private Image ship3mastSunk = new Image("file:src/main/resources/ship3mast-sunk.png");
+    private Image ship2mastSunk = new Image("file:src/main/resources/ship2mast-sunk.png");
+    private Image ship1mastSunk = new Image("file:src/main/resources/ship1mast-sunk.png");
     GridPane playgroundGridPlayer;
     GridPane playgroundGridOpponent;
 
@@ -65,15 +63,15 @@ public class BattleshipGame extends Application {
         HBox ships1masts = new HBox(new ImageView(ship1mast), new ImageView(ship1mast), new ImageView(ship1mast), new ImageView(ship1mast));
         ships1masts.setSpacing(38.0);
 
-        HBox ships4mastsOpponent = new HBox(new ImageView(ship4mastSinked));
+        HBox ships4mastsOpponent = new HBox(new ImageView(ship4mastSunk));
         ships4mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships3mastsOpponent = new HBox(new ImageView(ship3mastSinked), new ImageView(ship3mastSinked));
+        HBox ships3mastsOpponent = new HBox(new ImageView(ship3mastSunk), new ImageView(ship3mastSunk));
         ships3mastsOpponent.setSpacing(38.0);
         ships3mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships2mastsOpponent = new HBox(new ImageView(ship2mastSinked), new ImageView(ship2mastSinked), new ImageView(ship2mastSinked));
+        HBox ships2mastsOpponent = new HBox(new ImageView(ship2mastSunk), new ImageView(ship2mastSunk), new ImageView(ship2mastSunk));
         ships2mastsOpponent.setSpacing(38.0);
         ships2mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships1mastsOpponent = new HBox(new ImageView(ship1mastSinked), new ImageView(ship1mastSinked), new ImageView(ship1mastSinked), new ImageView(ship1mastSinked));
+        HBox ships1mastsOpponent = new HBox(new ImageView(ship1mastSunk), new ImageView(ship1mastSunk), new ImageView(ship1mastSunk), new ImageView(ship1mastSunk));
         ships1mastsOpponent.setSpacing(38.0);
         ships1mastsOpponent.setAlignment(Pos.TOP_RIGHT);
 
@@ -96,7 +94,7 @@ public class BattleshipGame extends Application {
 
             System.out.println("Statki playera:");
             playerShips.entrySet().stream()
-                    .map(a -> a.getKey().getX() + "," + a.getKey().getY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot())
+                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot() + a.getKey().getShip())
                     .forEach(System.out::println);
         });
 
@@ -210,7 +208,7 @@ public class BattleshipGame extends Application {
     }
 
     private Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship) {
-        Cell cell = new Cell();
+        Cell cell;
         for (int i = 1; i <= ship.getMasts(); i++) {
             switch (i) {
                 case 4:
@@ -222,7 +220,7 @@ public class BattleshipGame extends Application {
                 case 2:
                     cell = new Cell(ship.getX1(), ship.getY1(), ship);
                     break;
-                case 1:
+                default:
                     cell = new Cell(ship.getX(), ship.getY(), ship);
                     break;
             }

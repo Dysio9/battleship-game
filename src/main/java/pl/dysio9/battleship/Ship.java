@@ -1,7 +1,6 @@
 package pl.dysio9.battleship;
 
 
-import javafx.scene.Parent;
 import javafx.scene.image.Image;
 
 public class Ship {
@@ -56,6 +55,13 @@ public class Ship {
                 this.y = y;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Ship{" +
+                "masts=" + masts +
+                '}';
     }
 
     public void hit() {

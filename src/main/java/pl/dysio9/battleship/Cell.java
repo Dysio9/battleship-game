@@ -1,7 +1,5 @@
 package pl.dysio9.battleship;
 
-import javafx.scene.Parent;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Objects;
@@ -9,55 +7,20 @@ import java.util.Objects;
 public class Cell extends Rectangle {
     private int x;
     private int y;
-    private Ship ship = null;
-//    private PlayGrid playGrid;
+    private Ship ship;
     private boolean everShot = false;
-    Color color = Color.WHITE;
 
-    public Cell() {}
+    public Cell(int x, int y) {
+        this(x,y,null);
+    }
 
     public Cell(int x, int y, Ship ship) {
         super(x,y,38, 38);
         this.x = x;
         this.y = y;
         this.ship = ship;
-//        setFill(Color.BLUE);
-//        setStroke(Color.TRANSPARENT);
+        setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
     }
-
-    public Cell(int x, int y) {
-        super(x,y,38, 38);
-        this.x = x;
-        this.y = y;
-//        setFill(Color.TRANSPARENT);
-//        setStroke(Color.TRANSPARENT);
-    }
-//    public Cell(int x, int y, PlayGrid playGrid) {
-//        super(x, y, 38, 38);
-//        //super(38, 38);
-//        this.x = x;
-//        this.y = y;
-//        this.ship = ship;
-//        this.playGrid = playGrid;
-//        setFill(Color.LIGHTBLUE);
-//        setStroke(Color.TRANSPARENT);
-//    }
-
-//    public boolean shoot() {
-//        everShot = true;
-//
-//        if (ship != null) {
-//            ship.hit();
-//            setFill(Color.RED);
-//            if (ship.isSunk()) {
-//                playGrid.setUnsunkShips(playGrid.getUnsunkShips()-1);
-//            }
-//            return true;
-//        } else {
-//            setFill(Color.BLACK);
-//        }
-//        return false;
-//    }
 
     public int getValX() {
         return x;
@@ -73,11 +36,6 @@ public class Cell extends Rectangle {
 
     public Ship getShip() {
         return ship;
-    }
-
-
-    public void setShip(Ship ship) {
-        this.ship = ship;
     }
 
     public boolean wasEverShot() {
