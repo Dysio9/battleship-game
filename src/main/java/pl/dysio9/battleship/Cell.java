@@ -9,16 +9,18 @@ public class Cell extends Rectangle {
     private int y;
     private Ship ship;
     private boolean everShot = false;
+    private boolean isPlayerCell;
 
-    public Cell(int x, int y) {
-        this(x,y,null);
+    public Cell(int x, int y, boolean isPlayerCell) {
+        this(x,y,null, isPlayerCell);
     }
 
-    public Cell(int x, int y, Ship ship) {
+    public Cell(int x, int y, Ship ship, boolean isPlayerCell) {
         super(x,y,38, 38);
         this.x = x;
         this.y = y;
         this.ship = ship;
+        this.isPlayerCell = isPlayerCell;
         setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
     }
 
@@ -44,6 +46,10 @@ public class Cell extends Rectangle {
 
     public void setEverShot(boolean everShot) {
         this.everShot = everShot;
+    }
+
+    public boolean isPlayerCell() {
+        return isPlayerCell;
     }
 
     @Override

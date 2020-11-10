@@ -8,9 +8,11 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 
 public class Controller {
+    private boolean playerTurn;
     private Map<Cell, Ship> playerShips = new HashMap<>();
     private Map<Cell, Ship> opponentShips = new HashMap<>();
     private static Controller instance = null;
+
 
     Image shipImage = new Image("file:src/main/resources/ship1mast.png");
     Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
@@ -37,22 +39,40 @@ public class Controller {
         return opponentShips;
     }
 
+    public boolean isPlayerTurn() {
+        return playerTurn;
+    }
+
+    public void setPlayerTurn(boolean playerTurn) {
+        this.playerTurn = playerTurn;
+    }
+
     public void cellClicked(Cell cell) {
         System.out.println("Clicked x="+cell.getValX()+ " y="+cell.getValY());
         int x = cell.getValX();
         int y = cell.getValY();
 
-//        cell.getShip().hit();
-//        cell.setEverShot(true);
+        try {
+            cell.getShip().hit();
+        } catch (Exception e)   {
+//            System.out.println("Error: In this cell (" + x + "," + y + ") there is no ship! Don't worry!");
+        }
 
-        ImagePattern positiveShotImage = new ImagePattern(shotPositiveImage);
-        ImagePattern negativeShotImage = new ImagePattern(shotNegativeImage);
+        if (cell.isPlayerCell() != playerTurn) {
+            if (!cell.wasEverShot()) {
+                playerTurn = !playerTurn;
+                System.out.println("Player Turn: " + playerTurn);
 
-        if (cell.isThereAShip()) {
-            cell.setFill(positiveShotImage);
-        } else {
-            cell.setFill(negativeShotImage);
+                ImagePattern positiveShotImage = new ImagePattern(shotPositiveImage);
+                ImagePattern negativeShotImage = new ImagePattern(shotNegativeImage);
 
+                if (cell.isThereAShip()) {
+                    cell.setFill(positiveShotImage);
+                } else {
+                    cell.setFill(negativeShotImage);
+                }
+                cell.setEverShot(true);
+            }
         }
 
 //        ImageView positiveShotImage = new ImageView(shotPositiveImage);

@@ -12,6 +12,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -21,6 +23,7 @@ import java.util.*;
 public class BattleshipGame extends Application {
     private int totalScorePlayer = 0;
     private int totalScoreOpponent = 0;
+    private boolean showOpponentFleet = true;
     private Controller controller = Controller.getInstance();
     private Map<Cell, Ship> playerShips = controller.getPlayerShips();
     private Map<Cell, Ship> opponentShips = controller.getOpponentShips();
@@ -79,18 +82,18 @@ public class BattleshipGame extends Application {
         FlowPane fleetPlayer = new FlowPane(Orientation.VERTICAL);
         fleetPlayer.setAlignment(Pos.TOP_LEFT);
         fleetPlayer.setVgap(22.0);
-        fleetPlayer.setPrefWidth(342.0);
-//        fleetPlayer.setPrefHeight(266.0);
+        fleetPlayer.setPrefWidth(312.0);
         fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
 
         // MenuBar section
-        Button random = new Button();
-        random.setText("Random");
-        random.setOnAction(e -> {
+        Button randomButton= new Button();
+        randomButton.setText("Random");
+        randomButton.setPrefWidth(190);
+        randomButton.setOnAction(e -> {
             placePlayerShips();
-            updatePlaygroundGrid(playerShips, playgroundGridPlayer);
+            updatePlaygroundGrid(playerShips, playgroundGridPlayer, true,true);
             placeOpponentShips();
-            updatePlaygroundGrid(opponentShips, playgroundGridOpponent);
+            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, showOpponentFleet);
 
             System.out.println("Statki playera:");
             playerShips.entrySet().stream()
@@ -98,23 +101,67 @@ public class BattleshipGame extends Application {
                     .forEach(System.out::println);
         });
 
-        FlowPane menubar = new FlowPane(Orientation.VERTICAL);
-        menubar.setAlignment(Pos.BASELINE_CENTER);
-        menubar.setPrefWidth(190.0);
-//        menubar.setPrefHeight(266.0);
-        menubar.getChildren().addAll(new Label("Mode"),
-                new Button("Select mode"),
-                new Label("Place your ships, or press"),
-                random,
-                new Button("START"),
-                new Button("How to play"));
+        Label menuTopLabel = new Label("Mode");
+        Button modeButton = new Button("Select mode");
+        modeButton.setPrefWidth(190);
+        VBox menuTopVBox = new VBox(menuTopLabel, modeButton);
+        menuTopVBox.setAlignment(Pos.CENTER);
+        menuTopVBox.setPadding(new Insets(2, 0, 2, 0));
+        menuTopVBox.setSpacing(2);
+
+        Label menuLabel = new Label("Place your ships or press");
+        Button startButton = new Button("Start");
+        startButton.setPrefWidth(190);
+        Button surrenderButton = new Button("Surrender");
+        surrenderButton.setPrefWidth(190);
+        Button howToPlayButton = new Button("How to play");
+        howToPlayButton.setPrefWidth(190);
+
+        BorderPane menuMiddleSection = new BorderPane();
+        menuMiddleSection.setPadding(new Insets(0, 0, 0, 0));
+        menuMiddleSection.setPrefWidth(190.0);
+        menuMiddleSection.setBorder(new Border(new BorderStroke(Color.YELLOW,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        BorderPane.setAlignment(menuLabel, Pos.CENTER);
+        BorderPane.setAlignment(startButton, Pos.CENTER);
+        menuMiddleSection.setTop(menuLabel);
+        menuMiddleSection.setCenter(randomButton);
+        menuMiddleSection.setBottom(startButton);
+
+
+        startButton.setOnAction(e -> {
+            controller.setPlayerTurn(true);
+            if (controller.isPlayerTurn()) {
+                menuLabel.setText("Player turn.\n Choose a target on\n the opponent's grid.");
+            } else {
+                menuLabel.setText("Opponent Turn. Please wait...");
+            }
+            BorderPane.setAlignment(surrenderButton, Pos.CENTER);
+            menuMiddleSection.getChildren().remove(randomButton);
+            menuMiddleSection.setBottom(surrenderButton);
+        });
+        surrenderButton.setOnAction(e -> {
+            menuLabel.setText("You have surrender!\nTry the next time.");
+            menuMiddleSection.setCenter(randomButton);
+            menuMiddleSection.setBottom(startButton);
+        });
+
+        BorderPane menubar = new BorderPane();
+        menubar.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        menubar.setPadding(new Insets(0,0,0,0));
+        menubar.setTop(menuTopVBox);
+        menubar.setCenter(menuMiddleSection);
+        BorderPane.setAlignment(howToPlayButton, Pos.CENTER);
+        menubar.setBottom(howToPlayButton);
 
         // Opponent fleet
         FlowPane fleetOpponent = new FlowPane(Orientation.VERTICAL);
+        fleetOpponent.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         fleetOpponent.setAlignment(Pos.TOP_RIGHT);
         fleetOpponent.setVgap(22.0);
-        fleetOpponent.setPrefWidth(342.0);
-//        fleetOpponent.setPrefHeight(266.0);
+        fleetOpponent.setPrefWidth(312.0);
         fleetOpponent.getChildren().addAll(ships4mastsOpponent, ships3mastsOpponent, ships2mastsOpponent, ships1mastsOpponent);
 
         BorderPane middlePanel = new BorderPane();
@@ -124,21 +171,10 @@ public class BattleshipGame extends Application {
 
 //// --------------------------------------- Bottom Section -----------------------------------------
         playgroundGridPlayer = new GridPane();
-        updatePlaygroundGrid(playerShips, playgroundGridPlayer);
-
+        updatePlaygroundGrid(playerShips, playgroundGridPlayer, true, true);
 
         playgroundGridOpponent = new GridPane();
-        updatePlaygroundGrid(opponentShips, playgroundGridOpponent);
-//        playgroundGridOpponent.setGridLinesVisible(true);
-//        playgroundGridOpponent.setPrefSize(380.0, 380.0);
-//        for (int x = 0; x < 10; x++) {
-//            for (int y = 0; y < 10; y++) {
-//                Cell cell = new Cell(x, y);
-//                cell.setFill(Color.TRANSPARENT);
-//                cell.setStroke(Color.TRANSPARENT);
-//                playgroundGridOpponent.add(cell, x, y);
-//            }
-//        }
+        updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, showOpponentFleet);
 
         BorderPane bottomPanel = new BorderPane();
         bottomPanel.setLeft(playgroundGridPlayer);
@@ -154,7 +190,7 @@ public class BattleshipGame extends Application {
         Scene scene = new Scene(grid, 900, 760, Color.BLACK);
 
         primaryStage.setMinHeight(880.0);
-        primaryStage.setMinWidth(900.0);
+        primaryStage.setMinWidth(910.0);
         primaryStage.setTitle("Battleship Game");
         primaryStage.setScene(scene);
 //        primaryStage.setResizable(false);
@@ -207,21 +243,21 @@ public class BattleshipGame extends Application {
         return playersNameVBox;
     }
 
-    private Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship) {
+    private Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship, boolean isPlayer) {
         Cell cell;
         for (int i = 1; i <= ship.getMasts(); i++) {
             switch (i) {
                 case 4:
-                    cell = new Cell(ship.getX3(), ship.getY3(), ship);
+                    cell = new Cell(ship.getX3(), ship.getY3(), ship, isPlayer);
                     break;
                 case 3:
-                    cell = new Cell(ship.getX2(), ship.getY2(), ship);
+                    cell = new Cell(ship.getX2(), ship.getY2(), ship, isPlayer);
                     break;
                 case 2:
-                    cell = new Cell(ship.getX1(), ship.getY1(), ship);
+                    cell = new Cell(ship.getX1(), ship.getY1(), ship, isPlayer);
                     break;
                 default:
-                    cell = new Cell(ship.getX(), ship.getY(), ship);
+                    cell = new Cell(ship.getX(), ship.getY(), ship, isPlayer);
                     break;
             }
             shipsMap.put(cell, ship);
@@ -240,32 +276,32 @@ public class BattleshipGame extends Application {
 //    }
 
     private void placePlayerShips() {
-        addShip(playerShips, new Ship(0,0, 1, true));
-        addShip(playerShips, new Ship(2,1, 1, true));
-        addShip(playerShips, new Ship(4,2, 1, false));
-        addShip(playerShips, new Ship(6,3, 1, true));
-        addShip(playerShips, new Ship(8,0, 2, true));
-        addShip(playerShips, new Ship(8,2, 2, true));
-        addShip(playerShips, new Ship(8,4, 2, true));
-        addShip(playerShips, new Ship(0,3, 3, false));
-        addShip(playerShips, new Ship(0,7, 3, false));
-        addShip(playerShips, new Ship(6,9, 4, true));
+        addShip(playerShips, new Ship(0,0, 1, true), true);
+        addShip(playerShips, new Ship(2,1, 1, true), true);
+        addShip(playerShips, new Ship(4,2, 1, false), true);
+        addShip(playerShips, new Ship(6,3, 1, true), true);
+        addShip(playerShips, new Ship(8,0, 2, true), true);
+        addShip(playerShips, new Ship(8,2, 2, true), true);
+        addShip(playerShips, new Ship(8,4, 2, true), true);
+        addShip(playerShips, new Ship(0,3, 3, false), true);
+        addShip(playerShips, new Ship(0,7, 3, false), true);
+        addShip(playerShips, new Ship(6,9, 4, true), true);
     }
 
     private void  placeOpponentShips() {
-        addShip(opponentShips, new Ship(0,3, 1, true));
-        addShip(opponentShips, new Ship(2,2, 1, true));
-        addShip(opponentShips, new Ship(4,1, 1, false));
-        addShip(opponentShips, new Ship(6,0, 1, true));
-        addShip(opponentShips, new Ship(8,2, 2, true));
-        addShip(opponentShips, new Ship(8,0, 2, true));
-        addShip(opponentShips, new Ship(8,4, 2, false));
-        addShip(opponentShips, new Ship(3,5, 3, false));
-        addShip(opponentShips, new Ship(9,0, 3, true));
-        addShip(opponentShips, new Ship(5,7, 4, true));
+        addShip(opponentShips, new Ship(0,3, 1, true), false);
+        addShip(opponentShips, new Ship(2,2, 1, true), false);
+        addShip(opponentShips, new Ship(4,1, 1, false), false);
+        addShip(opponentShips, new Ship(6,0, 1, true), false);
+        addShip(opponentShips, new Ship(8,2, 2, true), false);
+        addShip(opponentShips, new Ship(8,0, 2, true), false);
+        addShip(opponentShips, new Ship(8,4, 2, false), false);
+        addShip(opponentShips, new Ship(3,5, 3, false), false);
+        addShip(opponentShips, new Ship(9,0, 3, true), false);
+        addShip(opponentShips, new Ship(5,7, 4, true), false);
     }
 
-    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson) {
+    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers, boolean showFleet) {
 //        List<Cell> cellsTaken = shipsMap.keySet().stream().map(e -> new Cell(e.getValX(), e.getValY())).collect(Collectors.toList());
 //        System.out.println(cellsTaken);
 
@@ -273,24 +309,33 @@ public class BattleshipGame extends Application {
 
         for (int x = 0; x < 10; x++) {
             for (int y = 0; y < 10; y++) {
-                Cell cell = new Cell(x,y);
-                if (shipsMap.containsKey(cell)) {
-                    cell = new Cell(x, y, shipsMap.get(cell));
-                    if (shipsMap.get(cell).isSunk()) {
-                        cell.setFill(Color.RED);
+                Cell cell = new Cell(x,y, isPlayers);
+                cell.setStroke(Color.BLACK);
+                    if (shipsMap.containsKey(cell)) {
+                        cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
                         cell.setStroke(Color.BLACK);
+                        if (showFleet) {
+                            if (shipsMap.get(cell).isSunk()) {
+                                cell.setFill(Color.RED);
+                            } else {
+                                cell.setFill(Color.LIGHTBLUE);
+                            }
+                        } else {
+                            cell.setFill(Color.TRANSPARENT);
+                        }
                     } else {
-                        cell.setFill(Color.LIGHTBLUE);
-                        cell.setStroke(Color.BLACK);
+                        if (cell.wasEverShot()) {
+                            cell.setFill(new ImagePattern(new Image("file:src/main/resources/shoot-negative.png")));
+                        } else {
+                            cell.setFill(Color.TRANSPARENT);
+                            cell.setStroke(Color.BLACK);
+                        }
                     }
-                } else {
-                    cell.setFill(Color.TRANSPARENT);
-                    cell.setStroke(Color.BLACK);
-                }
+
                 playgroundGridOfPerson.add(cell, x, y);
             }
         }
-        playgroundGridOfPerson.setGridLinesVisible(false);
+        playgroundGridOfPerson.setGridLinesVisible(true);
         playgroundGridOfPerson.setPrefSize(380.0, 380.0);
 
         return playgroundGridOfPerson;
