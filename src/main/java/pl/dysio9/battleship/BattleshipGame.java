@@ -13,7 +13,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -21,14 +20,12 @@ import javafx.stage.Stage;
 import java.util.*;
 
 public class BattleshipGame extends Application {
-    private int totalScorePlayer = 0;
-    private int totalScoreOpponent = 0;
     private boolean showOpponentFleet = true;
     private Controller controller = Controller.getInstance();
+    private Constants constants = Constants.getInstance();
     private Map<Cell, Ship> playerShips = controller.getPlayerShips();
     private Map<Cell, Ship> opponentShips = controller.getOpponentShips();
 
-    private Image imageback = new Image("file:src/main/resources/background2.png");
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
     private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
     private Image ship2mast = new Image("file:src/main/resources/ship2mast.png");
@@ -43,7 +40,7 @@ public class BattleshipGame extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         BackgroundSize backgroundSize = new BackgroundSize(950, 950, true, true, true, true);
-        BackgroundImage backgroundImage = new BackgroundImage(imageback, BackgroundRepeat.SPACE, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
+        BackgroundImage backgroundImage = new BackgroundImage(constants.getBackgroundImage(), BackgroundRepeat.SPACE, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, backgroundSize);
         Background background = new Background(backgroundImage);
 
         BorderPane grid = new BorderPane();
@@ -55,7 +52,13 @@ public class BattleshipGame extends Application {
         topPanel.setAlignment(Pos.CENTER);
         topPanel.setPrefHeight(76.0);
         topPanel.setHgap(65.0);
-        topPanel.getChildren().addAll(playersNamesLabel("Player", Pos.BOTTOM_LEFT), totalScoreLabel(totalScorePlayer), timerLabel(), totalScoreLabel(totalScoreOpponent), playersNamesLabel("Opponent", Pos.BOTTOM_RIGHT));
+        topPanel.getChildren().addAll(
+                playersNamesLabel("Player", Pos.BOTTOM_LEFT),
+                totalScorePlayerLabel(),
+                timerLabel(),
+                totalScoreOpponentLabel(),
+                playersNamesLabel("Opponent", Pos.BOTTOM_RIGHT)
+        );
 
 // ------------------------------------------- Middle Section -------------------------------------------------
         HBox ships4masts = new HBox(new ImageView(ship4mast));
@@ -86,14 +89,14 @@ public class BattleshipGame extends Application {
         fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
 
         // MenuBar section
-        Button randomButton= new Button();
+        Button randomButton = new Button();
         randomButton.setText("Random");
         randomButton.setPrefWidth(190);
         randomButton.setOnAction(e -> {
             placePlayerShips();
             updatePlaygroundGrid(playerShips, playgroundGridPlayer, true,true);
             placeOpponentShips();
-            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, showOpponentFleet);
+            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
 
             System.out.println("Statki playera:");
             playerShips.entrySet().stream()
@@ -109,12 +112,13 @@ public class BattleshipGame extends Application {
         menuTopVBox.setPadding(new Insets(2, 0, 2, 0));
         menuTopVBox.setSpacing(2);
 
-        Label menuLabel = new Label("Place your ships or press");
+        Label menuLabel = new Label(constants.getMenuLabelTextDefault());
+        controller.setMenuLabel(menuLabel);
         Button startButton = new Button("Start");
         startButton.setPrefWidth(190);
         Button surrenderButton = new Button("Surrender");
         surrenderButton.setPrefWidth(190);
-        Button howToPlayButton = new Button("How to play");
+        Button howToPlayButton = new Button("Player win this round");
         howToPlayButton.setPrefWidth(190);
 
         BorderPane menuMiddleSection = new BorderPane();
@@ -124,35 +128,36 @@ public class BattleshipGame extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         BorderPane.setAlignment(menuLabel, Pos.CENTER);
         BorderPane.setAlignment(startButton, Pos.CENTER);
+        BorderPane.setAlignment(surrenderButton, Pos.CENTER);
         menuMiddleSection.setTop(menuLabel);
         menuMiddleSection.setCenter(randomButton);
         menuMiddleSection.setBottom(startButton);
 
-
         startButton.setOnAction(e -> {
             controller.setPlayerTurn(true);
-            if (controller.isPlayerTurn()) {
-                menuLabel.setText("Player turn.\n Choose a target on\n the opponent's grid.");
-            } else {
-                menuLabel.setText("Opponent Turn. Please wait...");
-            }
-            BorderPane.setAlignment(surrenderButton, Pos.CENTER);
+            controller.setGameStarted(true);
+            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
             menuMiddleSection.getChildren().remove(randomButton);
             menuMiddleSection.setBottom(surrenderButton);
         });
         surrenderButton.setOnAction(e -> {
-            menuLabel.setText("You have surrender!\nTry the next time.");
+            controller.setGameStarted(false);
+            controller.roundLost();
+            menuLabel.setText(constants.getMenuLabelTextSurrender());
             menuMiddleSection.setCenter(randomButton);
             menuMiddleSection.setBottom(startButton);
         });
+        howToPlayButton.setOnAction(e -> {
+            controller.roundWin();
+        });
 
         BorderPane menubar = new BorderPane();
+        BorderPane.setAlignment(howToPlayButton, Pos.CENTER);
         menubar.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         menubar.setPadding(new Insets(0,0,0,0));
         menubar.setTop(menuTopVBox);
         menubar.setCenter(menuMiddleSection);
-        BorderPane.setAlignment(howToPlayButton, Pos.CENTER);
         menubar.setBottom(howToPlayButton);
 
         // Opponent fleet
@@ -174,7 +179,7 @@ public class BattleshipGame extends Application {
         updatePlaygroundGrid(playerShips, playgroundGridPlayer, true, true);
 
         playgroundGridOpponent = new GridPane();
-        updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, showOpponentFleet);
+        updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
 
         BorderPane bottomPanel = new BorderPane();
         bottomPanel.setLeft(playgroundGridPlayer);
@@ -189,7 +194,7 @@ public class BattleshipGame extends Application {
 
         Scene scene = new Scene(grid, 900, 760, Color.BLACK);
 
-        primaryStage.setMinHeight(880.0);
+        primaryStage.setMinHeight(900.0);
         primaryStage.setMinWidth(910.0);
         primaryStage.setTitle("Battleship Game");
         primaryStage.setScene(scene);
@@ -197,15 +202,32 @@ public class BattleshipGame extends Application {
         primaryStage.show();
     }
 
-    private VBox totalScoreLabel(int totalScore) {
+    private VBox totalScorePlayerLabel() {
         Label totalScoreTextLabel = new Label("Total Score");
         totalScoreTextLabel.setFont(new Font("Arial", 12));
         totalScoreTextLabel.setTextFill(Color.web("#0d1ea7"));
 
-        Label totalScoreLabel = new Label(String.valueOf(totalScore));
-        totalScoreLabel.setFont(new Font("Arial", 36));
-        totalScoreLabel.setTextFill(Color.web("#0d1ea7"));
-        VBox totalScoreVBox = new VBox(totalScoreTextLabel, totalScoreLabel);
+        Label totalScorePlayerLabel = new Label(String.valueOf(controller.getTotalScorePlayer()));
+        controller.setPlayerTotalScoreBoard(totalScorePlayerLabel);
+        totalScorePlayerLabel.setFont(new Font("Arial", 36));
+        totalScorePlayerLabel.setTextFill(Color.web("#0d1ea7"));
+        VBox totalScoreVBox;
+        totalScoreVBox = new VBox(totalScoreTextLabel, totalScorePlayerLabel);
+        totalScoreVBox.setAlignment(Pos.CENTER);
+        return totalScoreVBox;
+    }
+
+    private VBox totalScoreOpponentLabel() {
+        Label totalScoreTextLabel = new Label("Total Score");
+        totalScoreTextLabel.setFont(new Font("Arial", 12));
+        totalScoreTextLabel.setTextFill(Color.web("#0d1ea7"));
+
+        Label totalScoreOpponentLabel = new Label(String.valueOf(controller.getTotalScoreOpponent()));
+        controller.setTotalScoreOpponentLabel(totalScoreOpponentLabel);
+        totalScoreOpponentLabel.setFont(new Font("Arial", 36));
+        totalScoreOpponentLabel.setTextFill(Color.web("#0d1ea7"));
+        VBox totalScoreVBox;
+        totalScoreVBox = new VBox(totalScoreTextLabel, totalScoreOpponentLabel);
         totalScoreVBox.setAlignment(Pos.CENTER);
         return totalScoreVBox;
     }
@@ -265,16 +287,6 @@ public class BattleshipGame extends Application {
         return shipsMap;
     }
 
-//    private Map<Cell, Ship> placeShipsRandom (Map<Cell, Ship> shipsMap) {
-//        addShip(shipsMap, new Ship(0,0, 1, true));
-//        addShip(shipsMap, new Ship(2,1, 1, true));
-//        addShip(shipsMap, new Ship(4,2, 1, true));
-//        addShip(shipsMap, new Ship(6,3, 1, true));
-//        addShip(shipsMap, new Ship(8,4, 2, true));
-//        addShip(shipsMap, new Ship(0,3, 3, false));
-//        return shipsMap;
-//    }
-
     private void placePlayerShips() {
         addShip(playerShips, new Ship(0,0, 1, true), true);
         addShip(playerShips, new Ship(2,1, 1, true), true);
@@ -297,7 +309,7 @@ public class BattleshipGame extends Application {
         addShip(opponentShips, new Ship(8,0, 2, true), false);
         addShip(opponentShips, new Ship(8,4, 2, false), false);
         addShip(opponentShips, new Ship(3,5, 3, false), false);
-        addShip(opponentShips, new Ship(9,0, 3, true), false);
+        addShip(opponentShips, new Ship(1,6, 3, false), false);
         addShip(opponentShips, new Ship(5,7, 4, true), false);
     }
 
@@ -306,7 +318,7 @@ public class BattleshipGame extends Application {
 //        System.out.println(cellsTaken);
 
         playgroundGridOfPerson.getChildren().clear();
-
+// przy zapisie do pliku spróbować impl interfejs serializable lub własne kodowanie np 11-RED-Shooted-
         for (int x = 0; x < 10; x++) {
             for (int y = 0; y < 10; y++) {
                 Cell cell = new Cell(x,y, isPlayers);
