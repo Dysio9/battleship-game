@@ -35,11 +35,20 @@ public class Cell extends Rectangle {
                 ImagePattern positiveShotImage = new ImagePattern(constants.getShotPositiveImage());
                 ImagePattern negativeShotImage = new ImagePattern(constants.getShotNegativeImage());
 
-                controller.setPlayerTurn(!controller.isPlayerTurn());
                 if (isThereAShip()) {
                     this.setFill(positiveShotImage);
+                    getShip().hit();
+                    System.out.println("Unsunk player(" + controller.isPlayerTurn() + ") cells No: " + controller.getUnsunkCellsCount(controller.isPlayerTurn()));
+                    if (controller.getUnsunkCellsCount(controller.isPlayerTurn()) == 0) {
+                        if (controller.isPlayerTurn()) {
+                            controller.roundWin();
+                        } else {
+                            controller.roundLost();
+                        }
+                    }
                 } else {
                     this.setFill(negativeShotImage);
+                    controller.setPlayerTurn(!controller.isPlayerTurn());
                 }
                 this.setEverShot(true);
             }

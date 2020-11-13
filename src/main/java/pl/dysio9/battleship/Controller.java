@@ -3,7 +3,10 @@ package pl.dysio9.battleship;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 
 
 public class Controller {
@@ -18,6 +21,9 @@ public class Controller {
     private Label menuLabel;
     private Label totalScorePlayerLabel;
     private Label totalScoreOpponentLabel;
+    Button randomButton;
+    Button startButton;
+    BorderPane menuMiddleSection;
 
 //    Image shipImage = new Image("file:src/main/resources/ship1mast.png");
 //    Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
@@ -69,41 +75,10 @@ public class Controller {
     }
 
     public void cellClicked(Cell cell) {
-        System.out.println("Clicked x="+cell.getValX()+ " y="+cell.getValY());
-        int x = cell.getValX();
-        int y = cell.getValY();
+        System.out.println("Clicked x=" + cell.getValX()+ " y=" + cell.getValY());
 
         if (gameStarted) {
-            try {
-                cell.getShip().hit();
-            } catch (Exception e) {
-//            System.out.println("Error: In this cell (" + x + "," + y + ") there is no ship! Don't worry!");
-            }
-
             cell.shot();
-
-            if (isPlayerTurn()) {
-                menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
-                
-                long unsunkCells = playerShips.entrySet().stream()
-                        .filter(o -> !o.getValue().isSunk())
-                        .count();
-                System.out.println("Unsunk player cells No: " + unsunkCells);
-                if (unsunkCells == 0) {
-                    roundLost();
-                }
-
-            } else {
-                menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
-                long unsunkCells = opponentShips.entrySet().stream()
-                        .filter(o -> !o.getValue().isSunk())
-                        .count();
-                System.out.println("Unsunk opponent cells No: " + unsunkCells);
-
-                if (unsunkCells == 0) {
-                    roundWin();
-                }
-            }
         }
 
 //        ImageView positiveShotImage = new ImageView(shotPositiveImage);
@@ -138,6 +113,30 @@ public class Controller {
 
     }
 
+    public int getUnsunkCellsCount(boolean player) {
+        if (!player) {
+            return (int)playerShips.entrySet().stream()
+                        .filter(o -> !o.getValue().isSunk())
+                        .count();
+        } else {
+            return (int)opponentShips.entrySet().stream()
+                        .filter(o -> !o.getValue().isSunk())
+                        .count();
+        }
+    }
+
+    public void setRandomButton(Button randomButton) {
+        this.randomButton = randomButton;
+    }
+
+    public void setStartButton(Button startButton) {
+        this.startButton = startButton;
+    }
+
+    public void setMenuMiddleSection(BorderPane menuMiddleSection) {
+        this.menuMiddleSection = menuMiddleSection;
+    }
+
     public void setMenuLabel(Label menuLabel) {
         this.menuLabel = menuLabel;
     }
@@ -164,6 +163,8 @@ public class Controller {
         totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
         gameStarted = false;
         menuLabel.setText("You Win!\n Place Your ships again");
+        menuMiddleSection.setCenter(randomButton);
+        menuMiddleSection.setBottom(startButton);
     }
 
     public void roundLost() {
@@ -172,11 +173,15 @@ public class Controller {
         totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
         gameStarted = false;
         menuLabel.setText("Round Lost.\n Place your ships again");
+        menuMiddleSection.setCenter(randomButton);
+        menuMiddleSection.setBottom(startButton);
     }
 
     public void clearTotalScores() {
         totalScorePlayer = 0;
         totalScoreOpponent = 0;
+        totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
+        totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
     }
 
 }

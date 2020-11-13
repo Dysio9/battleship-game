@@ -91,21 +91,11 @@ public class BattleshipGame extends Application {
         // MenuBar section
         Button randomButton = new Button();
         randomButton.setText("Random");
+        controller.setRandomButton(randomButton);
         randomButton.setPrefWidth(190);
-        randomButton.setOnAction(e -> {
-            placePlayerShips();
-            updatePlaygroundGrid(playerShips, playgroundGridPlayer, true,true);
-            placeOpponentShips();
-            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
 
-            System.out.println("Statki playera:");
-            playerShips.entrySet().stream()
-                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot() + a.getKey().getShip())
-                    .forEach(System.out::println);
-        });
-
-        Label menuTopLabel = new Label("Mode");
-        Button modeButton = new Button("Select mode");
+        Label menuTopLabel = new Label("New Game");
+        Button modeButton = new Button("Clear Total Scores");
         modeButton.setPrefWidth(190);
         VBox menuTopVBox = new VBox(menuTopLabel, modeButton);
         menuTopVBox.setAlignment(Pos.CENTER);
@@ -115,6 +105,7 @@ public class BattleshipGame extends Application {
         Label menuLabel = new Label(constants.getMenuLabelTextDefault());
         controller.setMenuLabel(menuLabel);
         Button startButton = new Button("Start");
+        controller.setStartButton(startButton);
         startButton.setPrefWidth(190);
         Button surrenderButton = new Button("Surrender");
         surrenderButton.setPrefWidth(190);
@@ -132,13 +123,33 @@ public class BattleshipGame extends Application {
         menuMiddleSection.setTop(menuLabel);
         menuMiddleSection.setCenter(randomButton);
         menuMiddleSection.setBottom(startButton);
+        controller.setMenuMiddleSection(menuMiddleSection);
 
+        randomButton.setOnAction(e -> {
+            placePlayerShips();
+            updatePlaygroundGrid(playerShips, playgroundGridPlayer, true,true);
+            placeOpponentShips();
+            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
+            menuLabel.setText("Ships have been placed \n start the game");
+
+            System.out.println("Statki playera:");
+            playerShips.entrySet().stream()
+                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot() + a.getKey().getShip())
+                    .forEach(System.out::println);
+        });
+        modeButton.setOnAction(e -> {
+            controller.clearTotalScores();
+        });
         startButton.setOnAction(e -> {
-            controller.setPlayerTurn(true);
-            controller.setGameStarted(true);
-            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
-            menuMiddleSection.getChildren().remove(randomButton);
-            menuMiddleSection.setBottom(surrenderButton);
+            if (controller.getUnsunkCellsCount(true) == 20) {
+                controller.setPlayerTurn(true);
+                controller.setGameStarted(true);
+                menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+                menuMiddleSection.getChildren().remove(randomButton);
+                menuMiddleSection.setBottom(surrenderButton);
+            } else {
+                menuLabel.setText("Put your ships\non the grid\n or press random");
+            }
         });
         surrenderButton.setOnAction(e -> {
             controller.setGameStarted(false);
