@@ -1,6 +1,5 @@
 package pl.dysio9.battleship;
 
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Objects;
@@ -25,34 +24,6 @@ public class Cell extends Rectangle {
         this.ship = ship;
         this.isPlayerCell = isPlayerCell;
         setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
-    }
-
-    public void shot() {
-        if (isPlayerCell() != controller.isPlayerTurn()) {
-            if (!wasEverShot()) {
-                System.out.println("Player Turn: " + controller.isPlayerTurn());
-
-                ImagePattern positiveShotImage = new ImagePattern(constants.getShotPositiveImage());
-                ImagePattern negativeShotImage = new ImagePattern(constants.getShotNegativeImage());
-
-                if (isThereAShip()) {
-                    this.setFill(positiveShotImage);
-                    getShip().hit();
-                    System.out.println("Unsunk player(" + controller.isPlayerTurn() + ") cells No: " + controller.getUnsunkCellsCount(controller.isPlayerTurn()));
-                    if (controller.getUnsunkCellsCount(controller.isPlayerTurn()) == 0) {
-                        if (controller.isPlayerTurn()) {
-                            controller.roundWin();
-                        } else {
-                            controller.roundLost();
-                        }
-                    }
-                } else {
-                    this.setFill(negativeShotImage);
-                    controller.setPlayerTurn(!controller.isPlayerTurn());
-                }
-                this.setEverShot(true);
-            }
-        }
     }
 
     public int getValX() {

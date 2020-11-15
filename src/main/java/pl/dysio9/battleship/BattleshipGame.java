@@ -117,13 +117,13 @@ public class BattleshipGame extends Application {
         menuMiddleSection.setPrefWidth(190.0);
         menuMiddleSection.setBorder(new Border(new BorderStroke(Color.YELLOW,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        BorderPane.setAlignment(menuLabel, Pos.CENTER);
-        BorderPane.setAlignment(startButton, Pos.CENTER);
-        BorderPane.setAlignment(surrenderButton, Pos.CENTER);
         menuMiddleSection.setTop(menuLabel);
         menuMiddleSection.setCenter(randomButton);
         menuMiddleSection.setBottom(startButton);
         controller.setMenuMiddleSection(menuMiddleSection);
+        BorderPane.setAlignment(menuLabel, Pos.CENTER);
+        BorderPane.setAlignment(startButton, Pos.CENTER);
+        BorderPane.setAlignment(surrenderButton, Pos.CENTER);
 
         randomButton.setOnAction(e -> {
             placePlayerShips();
@@ -137,11 +137,10 @@ public class BattleshipGame extends Application {
                     .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot() + a.getKey().getShip())
                     .forEach(System.out::println);
         });
-        modeButton.setOnAction(e -> {
-            controller.clearTotalScores();
-        });
+        modeButton.setOnAction(e -> controller.clearTotalScores());
+
         startButton.setOnAction(e -> {
-            if (controller.getUnsunkCellsCount(true) == 20) {
+            if (controller.getUnsunkCellsCount(true) == 20 && controller.getUnsunkCellsCount(false) == 20) {
                 controller.setPlayerTurn(true);
                 controller.setGameStarted(true);
                 menuLabel.setText(constants.getMenuLabelTextPlayerTurn());

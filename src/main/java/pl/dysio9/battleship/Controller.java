@@ -3,7 +3,6 @@ package pl.dysio9.battleship;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -24,12 +23,6 @@ public class Controller {
     Button randomButton;
     Button startButton;
     BorderPane menuMiddleSection;
-
-//    Image shipImage = new Image("file:src/main/resources/ship1mast.png");
-//    Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
-//    Image shotNegativeImage = new Image("file:src/main/resources/shoot-negative.png");
-//    Image shotPositiveImage = new Image("file:src/main/resources/shoot-positive.png");
-
 
     private Controller() {
         // Exists only to defeat instantiation.
@@ -78,32 +71,34 @@ public class Controller {
         System.out.println("Clicked x=" + cell.getValX()+ " y=" + cell.getValY());
 
         if (gameStarted) {
-            cell.shot();
+            if (cell.isPlayerCell() != isPlayerTurn()) {
+                if (!cell.wasEverShot()) {
+                    System.out.println("Player Turn: " + isPlayerTurn());
+
+                    if (cell.isThereAShip()) {
+                        cell.setFill(constants.getShotPositiveImage());
+                        cell.getShip().hit();
+                        System.out.println("Unsunk player(" + isPlayerTurn() + ") cells No: " + getUnsunkCellsCount(isPlayerTurn()));
+                        if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
+                            if (isPlayerTurn()) {
+                                roundWin();
+                            } else {
+                                roundLost();
+                            }
+                        }
+                    } else {
+                        cell.setFill(constants.getShotNegativeImage());
+                        setPlayerTurn(!isPlayerTurn());
+                        if (isPlayerTurn()) {
+                            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+                        } else {
+                            menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+                        }
+                    }
+                    cell.setEverShot(true);
+                }
+            }
         }
-
-//        ImageView positiveShotImage = new ImageView(shotPositiveImage);
-//        ImageView negativeShotImage = new ImageView(shotNegativeImage);
-//        ImageView unSunkShipImage = new ImageView(shipImage);
-//        ImageView sunkShipImage = new ImageView(shipSunkImage);
-//        StackPane imageContainer = new StackPane();
-//
-//        if (cell.isThereAShip()) {
-//            if (cell.getShip().isSunk()) {
-//                imageContainer.getChildren().addAll(sunkShipImage, positiveShotImage);
-//            } else {
-//                imageContainer.getChildren().addAll(unSunkShipImage, positiveShotImage);
-//
-//            }
-//        } else {
-//            if (cell.getShip().isSunk()) {
-//                imageContainer.getChildren().addAll(sunkShipImage, negativeShotImage);
-//            } else {
-//                imageContainer.getChildren().addAll(unSunkShipImage, negativeShotImage);
-//
-//            }
-//        }
-//        cell.setFill(imageContainer);
-
 
 //        Cell firstRight = opponentShips.entrySet().stream()
 //                .map(cellShipEntry -> cellShipEntry.getKey())

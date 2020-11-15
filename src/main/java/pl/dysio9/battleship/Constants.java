@@ -1,6 +1,7 @@
 package pl.dysio9.battleship;
 
 import javafx.scene.image.Image;
+import javafx.scene.paint.ImagePattern;
 
 public class Constants {
     private static Constants instanceConstants = null;
@@ -23,8 +24,6 @@ public class Constants {
     private String menuLabelTextPlayerTurn = "Player turn.\n Choose a target on\n the opponent's grid.";
     private String menuLabelTextOpponentTurn = "Opponent Turn.\nPlease wait...";
     private String menuLabelTestSurrender = "You have surrender!\nTry the next time.";
-//    private int totalScorePlayer = 0;
-//    private int totalScoreOpponent = 0;
     private boolean showOpponentFleet = true;
 
     private Constants() {}
@@ -44,12 +43,12 @@ public class Constants {
         return backgroundImage;
     }
 
-    public Image getShotNegativeImage() {
-        return shotNegativeImage;
+    public ImagePattern getShotNegativeImage() {
+        return new ImagePattern(shotNegativeImage);
     }
 
-    public Image getShotPositiveImage() {
-        return shotPositiveImage;
+    public ImagePattern getShotPositiveImage() {
+        return new ImagePattern(shotPositiveImage);
     }
 
     public String getMenuLabelTextDefault() {
