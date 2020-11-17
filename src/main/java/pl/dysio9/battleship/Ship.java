@@ -49,13 +49,13 @@ public class Ship {
         yArray = new int[masts];
         if (horizontalPosition) {
             for (int i = 0; i < masts; i++) {
-                xArray[i] = x + i;
-                yArray[i] = y;
+                this.xArray[i] = x + i;
+                this.yArray[i] = y;
             }
         } else {
             for (int i = 0; i < masts; i++) {
-                xArray[i] = x;
-                yArray[i] = y + i;
+                this.xArray[i] = x;
+                this.yArray[i] = y + i;
             }
         }
     }
@@ -121,11 +121,17 @@ public class Ship {
     }
 
     public void showAllCoordinates() {
-        System.out.print("Koordynaty statku: ");
+        System.out.print("Koordynaty statku " + masts + "masztowego:");
         System.out.print("[" + y + "," + x + "]");
         System.out.print("[" + y1 + "," + x1 + "]");
         System.out.print("[" + y2 + "," + x2 + "]");
-        System.out.print("[" + y3 + "," + x3 + "]");
+        System.out.print("[" + y3 + "," + x3 + "]\n");
+        System.out.print("Nowe koordynaty statku " + masts + "masztowego:");
+        System.out.print("[" + yArray[0] + "," + xArray[0] + "]");
+        if (masts >= 2) System.out.print("[" + yArray[1] + "," + xArray[1] + "]");
+        if (masts >= 3) System.out.print("[" + yArray[2] + "," + xArray[2] + "]");
+        if (masts >= 4) System.out.print("[" + yArray[3] + "," + xArray[3] + "]");
+        System.out.println();
     }
 
     @Override

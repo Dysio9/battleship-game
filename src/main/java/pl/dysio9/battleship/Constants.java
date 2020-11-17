@@ -5,8 +5,8 @@ import javafx.scene.paint.ImagePattern;
 
 public class Constants {
     private static Constants instanceConstants = null;
-    private boolean showOpponentFleet = true;
-    private boolean showNeighbors = true;
+    private boolean showOpponentFleet = false;
+    private boolean showNeighbors = false;
 
     private Image backgroundImage = new Image("file:src/main/resources/background2.png");
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");

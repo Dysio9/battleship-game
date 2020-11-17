@@ -24,6 +24,8 @@ public class Controller {
     private Label totalScoreOpponentLabel;
     Button randomButton;
     Button startButton;
+    Button nextRoundButton;
+    Button surrenderButton;
     BorderPane menuMiddleSection;
     GridPane playgroundGridPlayer;
     GridPane playgroundGridOpponent;
@@ -37,6 +39,35 @@ public class Controller {
             instance = new Controller();
         }
         return instance;
+    }
+
+    public void opponentShoot() {
+        Random random = new Random();
+        List <Cell> allNeighbors = getAllNeighbors(playerShips,true);
+//        Cell cell;
+//        Ship ship;
+
+        int x = random.nextInt(10);
+        int y = random.nextInt(10);
+
+        List<Cell> cellsEverShot = playerShips.keySet().stream()
+                .filter(e -> e.wasEverShot())
+                .collect(Collectors.toList());
+
+
+
+//        int c = (int)playerShips.keySet().stream()
+//                .filter(e -> e.getValX() == x && e.getValY() == y)
+//                .filter(e -> e.wasEverShot())
+//                .count();
+//        if (c == 0) {
+//            Cell cell = new Cell(x,y,true);
+//            cell.setEverShot(true);
+//            playerShips.put(cell, null);
+//        } else {
+//            opponentShoot();
+//        }
+//        setPlayerTurn(true);
     }
 
     public void placeShipsRandomly(boolean player) {
@@ -53,15 +84,18 @@ public class Controller {
         ships.clear();
 
         Ship sh;
+        for (int i = 0; i < 1; ) {
             sh = new Ship(random.nextInt(10), random.nextInt(10), 4, random.nextBoolean());
             if (canPlaceShip(sh, player)) {
-                addShip(ships, sh, player);
+                addShip(sh, player);
+                i++;
             }
+        }
 
         for (int i = 0; i < 2; ) {
             sh = new Ship(random.nextInt(10), random.nextInt(10), 3, random.nextBoolean());
             if (canPlaceShip(sh, player)) {
-                addShip(ships, sh, player);
+                addShip(sh, player);
                 i++;
             }
         }
@@ -69,7 +103,7 @@ public class Controller {
         for (int i = 0; i < 3; ) {
             sh = new Ship(random.nextInt(10), random.nextInt(10), 2, random.nextBoolean());
             if (canPlaceShip(sh, player)) {
-                addShip(ships, sh, player);
+                addShip(sh, player);
                 i++;
             }
         }
@@ -77,7 +111,7 @@ public class Controller {
         for (int i = 0; i < 4; ) {
             sh = new Ship(random.nextInt(10), random.nextInt(10), 1, random.nextBoolean());
             if (canPlaceShip(sh, player)) {
-                addShip(ships, sh, player);
+                addShip(sh, player);
                 i++;
             }
         }
@@ -196,32 +230,16 @@ public class Controller {
         return neighborsAll.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
     }
 
-    public Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship, boolean isPlayer) {
-        Cell cell;
-        for (int i = 1; i <= ship.getMasts(); i++) {
-            switch (i) {
-                case 4:
-                    cell = new Cell(ship.getX3(), ship.getY3(), ship, isPlayer);
-                    break;
-                case 3:
-                    cell = new Cell(ship.getX2(), ship.getY2(), ship, isPlayer);
-                    break;
-                case 2:
-                    cell = new Cell(ship.getX1(), ship.getY1(), ship, isPlayer);
-                    break;
-                default:
-                    cell = new Cell(ship.getX(), ship.getY(), ship, isPlayer);
-                    break;
+    public void addShip (Ship ship, boolean isPlayer) {
+        ship.showAllCoordinates();
+        for (int i = 0; i < ship.getMasts(); i++) {
+            Cell cell = new Cell(ship.getXCoordinates(i), ship.getYCoordinates(i), ship, isPlayer);
+            if (isPlayer) {
+                playerShips.put(cell, ship);
+            } else {
+                opponentShips.put(cell, ship);
             }
-                shipsMap.put(cell, ship);
         }
-
-//        for (Cell c : getNeighbors(ship,isPlayer)) {
-//            c.setNeighbour(true);
-//            shipsMap.put(c, null);
-//        }
-
-        return shipsMap;
     }
 
     public boolean isValidCell(int x, int y) {
@@ -230,6 +248,24 @@ public class Controller {
         } else {
             return false;
         }
+    }
+
+    public boolean shipsArePlaced(boolean player) {
+        int placedShipsCounter;
+        if (player) {
+            placedShipsCounter = (int) playerShips.entrySet().stream()
+                    .filter(e -> e.getValue() != null)
+                    .count();
+        } else {
+            placedShipsCounter = (int) opponentShips.entrySet().stream()
+                    .filter(e -> e.getValue() != null).
+                    count();
+        }
+        if (placedShipsCounter == 10) {
+            return true;
+        }
+
+        return false;
     }
 
     public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers) {
@@ -244,7 +280,7 @@ public class Controller {
                 if (shipsMap.containsKey(cell)) {
                     cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
                     cell.setStroke(Color.BLACK);
-                    if (constants.showOpponentFleet()) {
+                    if (constants.showOpponentFleet() || isPlayers) {
                         if (shipsMap.get(cell) != null) {
 //                            if (shipsMap.get(cell).isSunk()) {
 //                                cell.setFill(Color.RED);
@@ -294,7 +330,6 @@ public class Controller {
             if (cell.isPlayerCell() != isPlayerTurn()) {
                 if (!cell.wasEverShot()) {
                     System.out.println("Player Turn: " + isPlayerTurn());
-
                     if (cell.isThereAShip()) {
                         cell.setFill(constants.getShotPositiveImage());
                         cell.getShip().hit();
@@ -319,13 +354,7 @@ public class Controller {
                 }
             }
         }
-
-//        Cell firstRight = opponentShips.entrySet().stream()
-//                .map(cellShipEntry -> cellShipEntry.getKey())
-//                .filter(c -> c.getValX() == x+1 && c.getValY() == y)
-//                .findFirst().get();
-//        firstRight.setFill(Color.RED);
-
+        opponentShoot();
     }
 
     public Map<Cell, Ship> getPlayerShips() {
@@ -362,12 +391,19 @@ public class Controller {
 
     public int getUnsunkCellsCount(boolean player) {
         if (!player) {
+            System.out.println("statki" +(int)playerShips.entrySet().stream()
+                    .filter(o -> o.getValue() != null)
+                    .filter(o -> !o.getValue().isSunk())
+                    .count());
+
             return (int)playerShips.entrySet().stream()
+                        .filter(o -> o.getValue() != null)
                         .filter(o -> !o.getValue().isSunk())
-                        .count();
+                    .count();
         } else {
             return (int)opponentShips.entrySet().stream()
-                        .filter(o -> !o.getValue().isSunk())
+                    .filter(o -> o.getValue() != null)
+                    .filter(o -> !o.getValue().isSunk())
                         .count();
         }
     }
@@ -378,6 +414,14 @@ public class Controller {
 
     public void setStartButton(Button startButton) {
         this.startButton = startButton;
+    }
+
+    public void setNextRoundButton(Button nextRoundButton) {
+        this.nextRoundButton = nextRoundButton;
+    }
+
+    public void setSurrenderButton(Button surrenderButton) {
+        this.surrenderButton = surrenderButton;
     }
 
     public void setMenuMiddleSection(BorderPane menuMiddleSection) {
@@ -414,12 +458,14 @@ public class Controller {
 
     public void roundWin() {
         totalScorePlayer++;
+
         System.out.println("You Win the round! Your score: " + totalScorePlayer);
         totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
         gameStarted = false;
-        menuLabel.setText("You Win!\n Place Your ships again");
-        menuMiddleSection.setCenter(randomButton);
-        menuMiddleSection.setBottom(startButton);
+        menuLabel.setText("You Win!");
+        menuMiddleSection.getChildren().remove(surrenderButton);
+        menuMiddleSection.setCenter(nextRoundButton);
+
     }
 
     public void roundLost() {
@@ -427,9 +473,9 @@ public class Controller {
         System.out.println("You've lost the round! Opponent score: " + totalScoreOpponent);
         totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
         gameStarted = false;
-        menuLabel.setText("Round Lost.\n Place your ships again");
-        menuMiddleSection.setCenter(randomButton);
-        menuMiddleSection.setBottom(startButton);
+        menuLabel.setText("Round Lost");
+        menuMiddleSection.getChildren().remove(surrenderButton);
+        menuMiddleSection.setCenter(nextRoundButton);
     }
 
     public void clearTotalScores() {

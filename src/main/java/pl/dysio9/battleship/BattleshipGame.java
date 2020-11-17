@@ -96,7 +96,7 @@ public class BattleshipGame extends Application {
         randomButton.setPrefWidth(190);
 
         Label menuTopLabel = new Label("New Game");
-        Button modeButton = new Button("Show predefined ships");
+        Button modeButton = new Button("Clear Total Scores");
         modeButton.setPrefWidth(190);
         VBox menuTopVBox = new VBox(menuTopLabel, modeButton);
         menuTopVBox.setAlignment(Pos.CENTER);
@@ -109,8 +109,12 @@ public class BattleshipGame extends Application {
         controller.setStartButton(startButton);
         startButton.setPrefWidth(190);
         Button surrenderButton = new Button("Surrender");
+        controller.setSurrenderButton(surrenderButton);
         surrenderButton.setPrefWidth(190);
         Button howToPlayButton = new Button("Player win this round");
+        howToPlayButton.setPrefWidth(190);
+        Button nextRoundButton = new Button("Play another round");
+        controller.setNextRoundButton(nextRoundButton);
         howToPlayButton.setPrefWidth(190);
 
         BorderPane menuMiddleSection = new BorderPane();
@@ -125,6 +129,7 @@ public class BattleshipGame extends Application {
         BorderPane.setAlignment(menuLabel, Pos.CENTER);
         BorderPane.setAlignment(startButton, Pos.CENTER);
         BorderPane.setAlignment(surrenderButton, Pos.CENTER);
+        BorderPane.setAlignment(nextRoundButton, Pos.CENTER);
 
         randomButton.setOnAction(e -> {
             controller.placeShipsRandomly(true);
@@ -133,33 +138,46 @@ public class BattleshipGame extends Application {
             controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
             menuLabel.setText("Ships have been placed \n start the game");
 
-            System.out.println("Statki playera:");
+//            System.out.println("Statki playera:");
 //            playerShips.entrySet().stream()
 //                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot())
 //                    .forEach(System.out::println);
         });
         modeButton.setOnAction(e -> {
-            placePlayerShips();
-            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
-            placeOpponentShips();
-            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+            controller.clearTotalScores();
+////            placePlayerShips();
+//            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+////            placeOpponentShips();
+//            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
         });
 
         startButton.setOnAction(e -> {
-            if (controller.getUnsunkCellsCount(true) == 20 && controller.getUnsunkCellsCount(false) == 20) {
+            System.out.println("Statki playera:");
+            playerShips.entrySet().stream()
+                    .map(a -> a.getKey().getValX() +","+a.getKey().getValY()+" jest sąsiadem("+a.getKey().isNeighbour()+") Statek:"+a.getValue())
+                    .forEach(System.out::println);
+
+            if (controller.shipsArePlaced(true) && controller.shipsArePlaced(false)) {
                 controller.setPlayerTurn(true);
                 controller.setGameStarted(true);
                 menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
                 menuMiddleSection.getChildren().remove(randomButton);
                 menuMiddleSection.setBottom(surrenderButton);
             } else {
-                menuLabel.setText("Put your ships\non the grid\n or press random");
+                menuLabel.setText(constants.getMenuLabelTextDefault());
             }
         });
         surrenderButton.setOnAction(e -> {
             controller.setGameStarted(false);
             controller.roundLost();
             menuLabel.setText(constants.getMenuLabelTextSurrender());
+            menuMiddleSection.setCenter(nextRoundButton);
+            menuMiddleSection.getChildren().remove(surrenderButton);
+        });
+        nextRoundButton.setOnAction(e -> {
+            playerShips.clear();
+            opponentShips.clear();
+            menuLabel.setText(constants.getMenuLabelTextDefault());
             menuMiddleSection.setCenter(randomButton);
             menuMiddleSection.setBottom(startButton);
         });
@@ -281,32 +299,32 @@ public class BattleshipGame extends Application {
         return playersNameVBox;
     }
 
-    private void placePlayerShips() {
-        playerShips.clear();
-        controller.addShip(playerShips, new Ship(0,0, 1, true), true);
-//        controller.addShip(playerShips, new Ship(2,1, 1, true), true);
-        controller.addShip(playerShips, new Ship(4,2, 1, false), true);
-//        controller.addShip(playerShips, new Ship(6,3, 1, true), true);
-//        controller.addShip(playerShips, new Ship(8,0, 2, true), true);
-        controller.addShip(playerShips, new Ship(7,2, 2, true), true);
-//        controller.addShip(playerShips, new Ship(8,4, 2, true), true);
-//        controller.addShip(playerShips, new Ship(0,3, 3, false), true);
-        controller.addShip(playerShips, new Ship(1,6, 3, false), true);
-//        controller.addShip(playerShips, new Ship(6,9, 4, true), true);
-    }
-
-    private void  placeOpponentShips() {
-        controller.addShip(opponentShips, new Ship(0,3, 1, true), false);
-        controller.addShip(opponentShips, new Ship(2,2, 1, true), false);
-        controller.addShip(opponentShips, new Ship(4,1, 1, false), false);
-        controller.addShip(opponentShips, new Ship(6,0, 1, true), false);
-        controller.addShip(opponentShips, new Ship(8,2, 2, true), false);
-        controller.addShip(opponentShips, new Ship(8,0, 2, true), false);
-        controller.addShip(opponentShips, new Ship(8,4, 2, false), false);
-        controller.addShip(opponentShips, new Ship(3,5, 3, false), false);
-        controller.addShip(opponentShips, new Ship(1,6, 3, false), false);
-        controller.addShip(opponentShips, new Ship(5,7, 4, true), false);
-    }
+//    private void placePlayerShips() {
+//        playerShips.clear();
+//        controller.addShip(playerShips, new Ship(0,0, 1, true), true);
+////        controller.addShip(playerShips, new Ship(2,1, 1, true), true);
+//        controller.addShip(playerShips, new Ship(4,2, 1, false), true);
+////        controller.addShip(playerShips, new Ship(6,3, 1, true), true);
+////        controller.addShip(playerShips, new Ship(8,0, 2, true), true);
+//        controller.addShip(playerShips, new Ship(7,2, 2, true), true);
+////        controller.addShip(playerShips, new Ship(8,4, 2, true), true);
+////        controller.addShip(playerShips, new Ship(0,3, 3, false), true);
+//        controller.addShip(playerShips, new Ship(1,6, 3, false), true);
+////        controller.addShip(playerShips, new Ship(6,9, 4, true), true);
+//    }
+//
+//    private void  placeOpponentShips() {
+//        controller.addShip(opponentShips, new Ship(0,3, 1, true), false);
+//        controller.addShip(opponentShips, new Ship(2,2, 1, true), false);
+//        controller.addShip(opponentShips, new Ship(4,1, 1, false), false);
+//        controller.addShip(opponentShips, new Ship(6,0, 1, true), false);
+//        controller.addShip(opponentShips, new Ship(8,2, 2, true), false);
+//        controller.addShip(opponentShips, new Ship(8,0, 2, true), false);
+//        controller.addShip(opponentShips, new Ship(8,4, 2, false), false);
+//        controller.addShip(opponentShips, new Ship(3,5, 3, false), false);
+//        controller.addShip(opponentShips, new Ship(1,6, 3, false), false);
+//        controller.addShip(opponentShips, new Ship(5,7, 4, true), false);
+//    }
 
 //    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers) {
 //        List <Cell> allNeighbors = controller.getAllNeighbors(shipsMap,isPlayers);

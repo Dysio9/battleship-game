@@ -48,6 +48,10 @@ public class Cell extends Rectangle {
         return ship;
     }
 
+    public Cell getCell(int x, int y) {
+        return this;
+    }
+
     public boolean wasEverShot() {
         return everShot;
     }
@@ -80,5 +84,10 @@ public class Cell extends Rectangle {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + "," + y +')';
     }
 }
