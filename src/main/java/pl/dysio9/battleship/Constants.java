@@ -5,6 +5,9 @@ import javafx.scene.paint.ImagePattern;
 
 public class Constants {
     private static Constants instanceConstants = null;
+    private boolean showOpponentFleet = true;
+    private boolean showNeighbors = true;
+
     private Image backgroundImage = new Image("file:src/main/resources/background2.png");
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
     private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
@@ -24,7 +27,6 @@ public class Constants {
     private String menuLabelTextPlayerTurn = "Player turn.\n Choose a target on\n the opponent's grid.";
     private String menuLabelTextOpponentTurn = "Opponent Turn.\nPlease wait...";
     private String menuLabelTestSurrender = "You have surrender!\nTry the next time.";
-    private boolean showOpponentFleet = true;
 
     private Constants() {}
 
@@ -37,6 +39,10 @@ public class Constants {
 
     public boolean showOpponentFleet() {
         return showOpponentFleet;
+    }
+
+    public boolean ShowNeighbors() {
+        return showNeighbors;
     }
 
     public Image getBackgroundImage() {

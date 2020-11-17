@@ -1,27 +1,16 @@
 package pl.dysio9.battleship;
 
 
-import javafx.scene.image.Image;
-
 public class Ship {
-    private int x, x1, x2 ,x3;
-    private int y ,y1, y2, y3;
+    private int x, x1 = -1, x2 = -1 ,x3 = -1;
+    private int y ,y1 = -1, y2 = -1, y3 = -1;
+    private int xArray[];
+    private int yArray[];
     private int masts;
     private int mastsHit = 0;
     private boolean horizontalPosition;
 
-    private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
-    private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
-    private Image ship2mast = new Image("file:src/main/resources/ship2mast.png");
-    private Image ship1mast = new Image("file:src/main/resources/ship1mast.png");
-    private Image ship4mastSinked = new Image("file:src/main/resources/ship4mast-sunk.png");
-    private Image ship3mastSinked = new Image("file:src/main/resources/ship3mast-sunk.png");
-    private Image ship2mastSinked = new Image("file:src/main/resources/ship2mast-sunk.png");
-    private Image ship1mastSinked = new Image("file:src/main/resources/ship1mast-sunk.png");
-
     public Ship(int x, int y, int masts, boolean horizontalPosition) {
-//        this.x = x;
-//        this.y = y;
         this.masts = masts;
         this.horizontalPosition = horizontalPosition;
         if (horizontalPosition) {
@@ -55,13 +44,20 @@ public class Ship {
                 this.y = y;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "Ship{" +
-                "masts=" + masts +
-                '}';
+        xArray = new int[masts];
+        yArray = new int[masts];
+        if (horizontalPosition) {
+            for (int i = 0; i < masts; i++) {
+                xArray[i] = x + i;
+                yArray[i] = y;
+            }
+        } else {
+            for (int i = 0; i < masts; i++) {
+                xArray[i] = x;
+                yArray[i] = y + i;
+            }
+        }
     }
 
     public void hit() {
@@ -72,22 +68,6 @@ public class Ship {
         return mastsHit >= masts;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
     public boolean isHorizontalPosition() {
         return horizontalPosition;
     }
@@ -96,8 +76,20 @@ public class Ship {
         this.horizontalPosition = horizontalPosition;
     }
 
+    public int getXCoordinates(int i) {
+        return xArray[i];
+    }
+
+    public int getYCoordinates(int i) {
+        return yArray[i];
+    }
+
     public int getMasts() {
         return masts;
+    }
+
+    public int getX() {
+        return x;
     }
 
     public int getX1() {
@@ -110,6 +102,10 @@ public class Ship {
 
     public int getX3() {
         return x3;
+    }
+
+    public int getY() {
+        return y;
     }
 
     public int getY1() {
@@ -130,5 +126,12 @@ public class Ship {
         System.out.print("[" + y1 + "," + x1 + "]");
         System.out.print("[" + y2 + "," + x2 + "]");
         System.out.print("[" + y3 + "," + x3 + "]");
+    }
+
+    @Override
+    public String toString() {
+        return "Ship{" +
+                "masts=" + masts +
+                '}';
     }
 }

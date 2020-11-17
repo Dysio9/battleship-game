@@ -18,6 +18,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BattleshipGame extends Application {
     private boolean showOpponentFleet = true;
@@ -95,7 +96,7 @@ public class BattleshipGame extends Application {
         randomButton.setPrefWidth(190);
 
         Label menuTopLabel = new Label("New Game");
-        Button modeButton = new Button("Clear Total Scores");
+        Button modeButton = new Button("Show predefined ships");
         modeButton.setPrefWidth(190);
         VBox menuTopVBox = new VBox(menuTopLabel, modeButton);
         menuTopVBox.setAlignment(Pos.CENTER);
@@ -126,18 +127,23 @@ public class BattleshipGame extends Application {
         BorderPane.setAlignment(surrenderButton, Pos.CENTER);
 
         randomButton.setOnAction(e -> {
-            placePlayerShips();
-            updatePlaygroundGrid(playerShips, playgroundGridPlayer, true,true);
-            placeOpponentShips();
-            updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
+            controller.placeShipsRandomly(true);
+            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+            controller.placeShipsRandomly(false);
+            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
             menuLabel.setText("Ships have been placed \n start the game");
 
             System.out.println("Statki playera:");
-            playerShips.entrySet().stream()
-                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot() + a.getKey().getShip())
-                    .forEach(System.out::println);
+//            playerShips.entrySet().stream()
+//                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot())
+//                    .forEach(System.out::println);
         });
-        modeButton.setOnAction(e -> controller.clearTotalScores());
+        modeButton.setOnAction(e -> {
+            placePlayerShips();
+            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+            placeOpponentShips();
+            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+        });
 
         startButton.setOnAction(e -> {
             if (controller.getUnsunkCellsCount(true) == 20 && controller.getUnsunkCellsCount(false) == 20) {
@@ -186,10 +192,10 @@ public class BattleshipGame extends Application {
 
 //// --------------------------------------- Bottom Section -----------------------------------------
         playgroundGridPlayer = new GridPane();
-        updatePlaygroundGrid(playerShips, playgroundGridPlayer, true, true);
+        controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
 
         playgroundGridOpponent = new GridPane();
-        updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false, constants.showOpponentFleet());
+        controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
 
         BorderPane bottomPanel = new BorderPane();
         bottomPanel.setLeft(playgroundGridPlayer);
@@ -275,98 +281,79 @@ public class BattleshipGame extends Application {
         return playersNameVBox;
     }
 
-    private Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship, boolean isPlayer) {
-        Cell cell;
-        for (int i = 1; i <= ship.getMasts(); i++) {
-            switch (i) {
-                case 4:
-                    cell = new Cell(ship.getX3(), ship.getY3(), ship, isPlayer);
-                    break;
-                case 3:
-                    cell = new Cell(ship.getX2(), ship.getY2(), ship, isPlayer);
-                    break;
-                case 2:
-                    cell = new Cell(ship.getX1(), ship.getY1(), ship, isPlayer);
-                    break;
-                default:
-                    cell = new Cell(ship.getX(), ship.getY(), ship, isPlayer);
-                    break;
-            }
-            shipsMap.put(cell, ship);
-        }
-        return shipsMap;
-    }
-
     private void placePlayerShips() {
-        addShip(playerShips, new Ship(0,0, 1, true), true);
-        addShip(playerShips, new Ship(2,1, 1, true), true);
-        addShip(playerShips, new Ship(4,2, 1, false), true);
-        addShip(playerShips, new Ship(6,3, 1, true), true);
-        addShip(playerShips, new Ship(8,0, 2, true), true);
-        addShip(playerShips, new Ship(8,2, 2, true), true);
-        addShip(playerShips, new Ship(8,4, 2, true), true);
-        addShip(playerShips, new Ship(0,3, 3, false), true);
-        addShip(playerShips, new Ship(0,7, 3, false), true);
-        addShip(playerShips, new Ship(6,9, 4, true), true);
+        playerShips.clear();
+        controller.addShip(playerShips, new Ship(0,0, 1, true), true);
+//        controller.addShip(playerShips, new Ship(2,1, 1, true), true);
+        controller.addShip(playerShips, new Ship(4,2, 1, false), true);
+//        controller.addShip(playerShips, new Ship(6,3, 1, true), true);
+//        controller.addShip(playerShips, new Ship(8,0, 2, true), true);
+        controller.addShip(playerShips, new Ship(7,2, 2, true), true);
+//        controller.addShip(playerShips, new Ship(8,4, 2, true), true);
+//        controller.addShip(playerShips, new Ship(0,3, 3, false), true);
+        controller.addShip(playerShips, new Ship(1,6, 3, false), true);
+//        controller.addShip(playerShips, new Ship(6,9, 4, true), true);
     }
 
     private void  placeOpponentShips() {
-        addShip(opponentShips, new Ship(0,3, 1, true), false);
-        addShip(opponentShips, new Ship(2,2, 1, true), false);
-        addShip(opponentShips, new Ship(4,1, 1, false), false);
-        addShip(opponentShips, new Ship(6,0, 1, true), false);
-        addShip(opponentShips, new Ship(8,2, 2, true), false);
-        addShip(opponentShips, new Ship(8,0, 2, true), false);
-        addShip(opponentShips, new Ship(8,4, 2, false), false);
-        addShip(opponentShips, new Ship(3,5, 3, false), false);
-        addShip(opponentShips, new Ship(1,6, 3, false), false);
-        addShip(opponentShips, new Ship(5,7, 4, true), false);
+        controller.addShip(opponentShips, new Ship(0,3, 1, true), false);
+        controller.addShip(opponentShips, new Ship(2,2, 1, true), false);
+        controller.addShip(opponentShips, new Ship(4,1, 1, false), false);
+        controller.addShip(opponentShips, new Ship(6,0, 1, true), false);
+        controller.addShip(opponentShips, new Ship(8,2, 2, true), false);
+        controller.addShip(opponentShips, new Ship(8,0, 2, true), false);
+        controller.addShip(opponentShips, new Ship(8,4, 2, false), false);
+        controller.addShip(opponentShips, new Ship(3,5, 3, false), false);
+        controller.addShip(opponentShips, new Ship(1,6, 3, false), false);
+        controller.addShip(opponentShips, new Ship(5,7, 4, true), false);
     }
 
-    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers, boolean showFleet) {
-//        List<Cell> cellsTaken = shipsMap.keySet().stream().map(e -> new Cell(e.getValX(), e.getValY())).collect(Collectors.toList());
-//        System.out.println(cellsTaken);
-
-        playgroundGridOfPerson.getChildren().clear();
-// przy zapisie do pliku spróbować impl interfejs serializable lub własne kodowanie np 11-RED-Shooted-
-        for (int x = 0; x < 10; x++) {
-            for (int y = 0; y < 10; y++) {
-                Cell cell = new Cell(x,y, isPlayers);
-                cell.setStroke(Color.BLACK);
-                    if (shipsMap.containsKey(cell)) {
-                        cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
-                        cell.setStroke(Color.BLACK);
-                        if (showFleet) {
-                            if (shipsMap.get(cell).isSunk()) {
-                                cell.setFill(Color.RED);
-                            } else {
-                                cell.setFill(Color.LIGHTBLUE);
-                            }
-                        } else {
-                            cell.setFill(Color.TRANSPARENT);
-                        }
-                    } else {
-                        if (cell.wasEverShot()) {
-                            cell.setFill(new ImagePattern(new Image("file:src/main/resources/shoot-negative.png")));
-                        } else {
-                            cell.setFill(Color.TRANSPARENT);
-                            cell.setStroke(Color.BLACK);
-                        }
-                    }
-
-                playgroundGridOfPerson.add(cell, x, y);
-            }
-        }
-        playgroundGridOfPerson.setGridLinesVisible(true);
-        playgroundGridOfPerson.setPrefSize(380.0, 380.0);
-
-        return playgroundGridOfPerson;
-    }
-
-    public boolean isValidCell(int x, int y) {
-        return x >= 0 && x < 10 && y >= 0 && y < 10;
-    }
-
+//    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers) {
+//        List <Cell> allNeighbors = controller.getAllNeighbors(shipsMap,isPlayers);
+//
+//        playgroundGridOfPerson.getChildren().clear();
+//// przy zapisie do pliku spróbować impl interfejs serializable lub własne kodowanie np 11-RED-Shooted-
+//        for (int x = 0; x < 10; x++) {
+//            for (int y = 0; y < 10; y++) {
+//                Cell cell = new Cell(x,y, isPlayers);
+//                cell.setStroke(Color.BLACK);
+//                if (shipsMap.containsKey(cell)) {
+//                    cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
+//                    cell.setStroke(Color.BLACK);
+//                    if (constants.showOpponentFleet()) {
+//                        if (shipsMap.get(cell).isSunk()) {
+//                            cell.setFill(Color.RED);
+//                        } else {
+//                            cell.setFill(Color.LIGHTBLUE);
+//                        }
+//                    } else {
+//                        cell.setFill(Color.TRANSPARENT);
+//                    }
+//                } else {
+//                    if (cell.wasEverShot()) {
+//                        cell.setFill(constants.getShotNegativeImage());
+//                    } else {
+//                        if (allNeighbors.contains(cell)) {
+//                            if (constants.ShowNeighbors()) {
+//                                cell.setFill(Color.LIGHTGOLDENRODYELLOW);
+//                            } else {
+//                                cell.setFill(Color.TRANSPARENT);
+//                            }
+//                        } else {
+//                            cell.setFill(Color.TRANSPARENT);
+//                        }
+//                        cell.setStroke(Color.BLACK);
+//                    }
+//                }
+//
+//                playgroundGridOfPerson.add(cell, x, y);
+//            }
+//        }
+//        playgroundGridOfPerson.setGridLinesVisible(true);
+//        playgroundGridOfPerson.setPrefSize(380.0, 380.0);
+//
+//        return playgroundGridOfPerson;
+//    }
 
 
     public static void main(String[] args) {

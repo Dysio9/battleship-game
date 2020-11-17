@@ -1,11 +1,13 @@
 package pl.dysio9.battleship;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 
 
 public class Controller {
@@ -23,6 +25,8 @@ public class Controller {
     Button randomButton;
     Button startButton;
     BorderPane menuMiddleSection;
+    GridPane playgroundGridPlayer;
+    GridPane playgroundGridOpponent;
 
     private Controller() {
         // Exists only to defeat instantiation.
@@ -35,36 +39,252 @@ public class Controller {
         return instance;
     }
 
-    public Map<Cell, Ship> getPlayerShips() {
-        return playerShips;
-    }
+    public void placeShipsRandomly(boolean player) {
+        Map<Cell, Ship> ships;
 
-    public Map<Cell, Ship> getOpponentShips() {
-        return opponentShips;
-    }
-
-    public boolean isPlayerTurn() {
-        return playerTurn;
-    }
-
-    public void setPlayerTurn(boolean playerTurn) {
-        this.playerTurn = playerTurn;
-    }
-
-    public boolean isGameStarted() {
-        return gameStarted;
-    }
-
-    public void setGameStarted(boolean gameStarted) {
-        this.gameStarted = gameStarted;
-    }
-
-    public void getDefaultMenuLabel() {
-        if (playerTurn) {
-            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
-        } else  {
-            menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+        if (player) {
+            ships = playerShips;
+        } else {
+            ships = opponentShips;
         }
+
+        Random random = new Random();
+
+        ships.clear();
+
+        Ship sh;
+            sh = new Ship(random.nextInt(10), random.nextInt(10), 4, random.nextBoolean());
+            if (canPlaceShip(sh, player)) {
+                addShip(ships, sh, player);
+            }
+
+        for (int i = 0; i < 2; ) {
+            sh = new Ship(random.nextInt(10), random.nextInt(10), 3, random.nextBoolean());
+            if (canPlaceShip(sh, player)) {
+                addShip(ships, sh, player);
+                i++;
+            }
+        }
+
+        for (int i = 0; i < 3; ) {
+            sh = new Ship(random.nextInt(10), random.nextInt(10), 2, random.nextBoolean());
+            if (canPlaceShip(sh, player)) {
+                addShip(ships, sh, player);
+                i++;
+            }
+        }
+
+        for (int i = 0; i < 4; ) {
+            sh = new Ship(random.nextInt(10), random.nextInt(10), 1, random.nextBoolean());
+            if (canPlaceShip(sh, player)) {
+                addShip(ships, sh, player);
+                i++;
+            }
+        }
+    }
+
+    public boolean canPlaceShip (Ship ship, boolean player) {
+        Map<Cell, Ship> ships;
+
+        if (player) {
+            ships = playerShips;
+        } else {
+            ships = opponentShips;
+        }
+
+        if (ships.size() == 0) {
+            if (!isValidCell(ship.getXCoordinates(ship.getMasts()-1), ship.getYCoordinates(ship.getMasts()-1))) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (!isValidCell(ship.getXCoordinates(ship.getMasts()-1), ship.getYCoordinates(ship.getMasts()-1))) {
+                return false;
+            } else {
+                for (int j = 0; j < ship.getMasts(); j++) {
+                    if (getAllNeighbors(ships, player).contains(new Cell(ship.getXCoordinates(j), ship.getYCoordinates(j), player))) {
+                        return false;
+                    }
+                    if (ships.containsKey(new Cell(ship.getXCoordinates(j), ship.getYCoordinates(j), player))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    public List<Cell> getNeighbors(Ship ship, boolean player) {
+        List<Cell> neighbors = new ArrayList<>();
+        if (ship != null) {
+            for (int i = 1; i <= ship.getMasts(); i++) {
+                if (ship.isHorizontalPosition()) {
+                    switch (i) {
+                        case 4:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() + 1, player, true));
+                            break;
+                        case 3:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
+                            break;
+                        case 2:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            break;
+                        case 1:
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
+                            break;
+                    }
+                    neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
+                } else {
+                    switch (i) {
+                        case 4:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 4, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 4, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 4, player, true));
+                            break;
+                        case 3:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
+                            break;
+                        case 2:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            break;
+                        case 1:
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
+                    }
+                }
+                neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
+            }
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY(), player, true));
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 1, player, true));
+            neighbors.add(new Cell(ship.getX(), ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() + 1, ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 1, player, true));
+        }
+        return neighbors.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
+    }
+
+    public List<Cell> getAllNeighbors(Map<Cell, Ship> shipsMap, boolean player) {
+        List<Ship> shipList = shipsMap.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+        List<Cell> neighborsAll = new ArrayList<>();
+
+        for (Ship ship : shipList) {
+            neighborsAll.addAll(getNeighbors(ship,player));
+        }
+        return neighborsAll.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
+    }
+
+    public Map<Cell, Ship> addShip (Map<Cell, Ship> shipsMap, Ship ship, boolean isPlayer) {
+        Cell cell;
+        for (int i = 1; i <= ship.getMasts(); i++) {
+            switch (i) {
+                case 4:
+                    cell = new Cell(ship.getX3(), ship.getY3(), ship, isPlayer);
+                    break;
+                case 3:
+                    cell = new Cell(ship.getX2(), ship.getY2(), ship, isPlayer);
+                    break;
+                case 2:
+                    cell = new Cell(ship.getX1(), ship.getY1(), ship, isPlayer);
+                    break;
+                default:
+                    cell = new Cell(ship.getX(), ship.getY(), ship, isPlayer);
+                    break;
+            }
+                shipsMap.put(cell, ship);
+        }
+
+//        for (Cell c : getNeighbors(ship,isPlayer)) {
+//            c.setNeighbour(true);
+//            shipsMap.put(c, null);
+//        }
+
+        return shipsMap;
+    }
+
+    public boolean isValidCell(int x, int y) {
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers) {
+        List <Cell> allNeighbors = getAllNeighbors(shipsMap,isPlayers);
+
+        playgroundGridOfPerson.getChildren().clear();
+// przy zapisie do pliku spróbować impl interfejs serializable lub własne kodowanie np 11-RED-Shooted-
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 10; y++) {
+                Cell cell = new Cell(x,y, isPlayers);
+                cell.setStroke(Color.BLACK);
+                if (shipsMap.containsKey(cell)) {
+                    cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
+                    cell.setStroke(Color.BLACK);
+                    if (constants.showOpponentFleet()) {
+                        if (shipsMap.get(cell) != null) {
+//                            if (shipsMap.get(cell).isSunk()) {
+//                                cell.setFill(Color.RED);
+//                            } else {
+                                cell.setFill(Color.LIGHTBLUE);
+//                            }
+                        } else {
+                            cell.setFill(Color.YELLOW);
+                        }
+                    } else {
+                        cell.setFill(Color.TRANSPARENT);
+                    }
+                } else {
+                    if (cell.wasEverShot()) {
+                        cell.setFill(constants.getShotNegativeImage());
+                    } else {
+                        if (allNeighbors.contains(cell)) {
+                            if (constants.ShowNeighbors()) {
+                                cell.setFill(Color.LIGHTGOLDENRODYELLOW);
+                            } else {
+                                cell.setFill(Color.TRANSPARENT);
+                            }
+                        } else {
+                            cell.setFill(Color.TRANSPARENT);
+                        }
+                        cell.setStroke(Color.BLACK);
+                    }
+                }
+                playgroundGridOfPerson.add(cell, x, y);
+            }
+        }
+
+        for (Cell c : allNeighbors) {
+            c.setNeighbour(true);
+            shipsMap.put(c, null);
+        }
+        playgroundGridOfPerson.setGridLinesVisible(true);
+        playgroundGridOfPerson.setPrefSize(380.0, 380.0);
+
+        return playgroundGridOfPerson;
     }
 
     public void cellClicked(Cell cell) {
@@ -108,6 +328,38 @@ public class Controller {
 
     }
 
+    public Map<Cell, Ship> getPlayerShips() {
+        return playerShips;
+    }
+
+    public Map<Cell, Ship> getOpponentShips() {
+        return opponentShips;
+    }
+
+    public boolean isPlayerTurn() {
+        return playerTurn;
+    }
+
+    public void setPlayerTurn(boolean playerTurn) {
+        this.playerTurn = playerTurn;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
+    }
+
+    public void getDefaultMenuLabel() {
+        if (playerTurn) {
+            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+        } else  {
+            menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+        }
+    }
+
     public int getUnsunkCellsCount(boolean player) {
         if (!player) {
             return (int)playerShips.entrySet().stream()
@@ -134,6 +386,14 @@ public class Controller {
 
     public void setMenuLabel(Label menuLabel) {
         this.menuLabel = menuLabel;
+    }
+
+    public void setPlaygroundGridPlayer(GridPane playgroundGridPlayer) {
+        this.playgroundGridPlayer = playgroundGridPlayer;
+    }
+
+    public void setPlaygroundGridOpponent(GridPane playgroundGridOpponent) {
+        this.playgroundGridOpponent = playgroundGridOpponent;
     }
 
     public void setPlayerTotalScoreBoard(Label totalScoreLabel) {

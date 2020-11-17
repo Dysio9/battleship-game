@@ -11,7 +11,13 @@ public class Cell extends Rectangle {
     private int y;
     private Ship ship;
     private boolean everShot = false;
-    private boolean isPlayerCell;
+    private boolean isPlayerCell = false;
+    private boolean isNeighbour = false;
+
+    public Cell(int x, int y, boolean isPlayerCell, boolean isNeighbour) {
+        this(x,y,null, isPlayerCell);
+        this.isNeighbour = isNeighbour;
+    }
 
     public Cell(int x, int y, boolean isPlayerCell) {
         this(x,y,null, isPlayerCell);
@@ -52,6 +58,14 @@ public class Cell extends Rectangle {
 
     public boolean isPlayerCell() {
         return isPlayerCell;
+    }
+
+    public boolean isNeighbour() {
+        return isNeighbour;
+    }
+
+    public void setNeighbour(boolean neighbour) {
+        isNeighbour = neighbour;
     }
 
     @Override
