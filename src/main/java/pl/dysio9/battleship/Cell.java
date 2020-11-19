@@ -1,7 +1,9 @@
 package pl.dysio9.battleship;
 
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class Cell extends Rectangle {
@@ -10,13 +12,13 @@ public class Cell extends Rectangle {
     private int x;
     private int y;
     private Ship ship;
+    private boolean isPlayerCell;
     private boolean everShot = false;
-    private boolean isPlayerCell = false;
-    private boolean isNeighbour = false;
+    private boolean isNeighbor = false;
 
-    public Cell(int x, int y, boolean isPlayerCell, boolean isNeighbour) {
+    public Cell(int x, int y, boolean isPlayerCell, boolean isNeighbor) {
         this(x,y,null, isPlayerCell);
-        this.isNeighbour = isNeighbour;
+        this.isNeighbor = isNeighbor;
     }
 
     public Cell(int x, int y, boolean isPlayerCell) {
@@ -30,6 +32,22 @@ public class Cell extends Rectangle {
         this.ship = ship;
         this.isPlayerCell = isPlayerCell;
         setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
+    }
+
+    public ImagePattern getCellFill() {
+        if (ship != null) {
+            if (everShot) {
+                return constants.getShotPositiveImage();
+            } else {
+                return constants.getCellTransparentImage();
+            }
+        } else {
+            if (everShot) {
+                return constants.getShotNegativeImage();
+            } else {
+                return constants.getCellTransparentImage();
+            }
+        }
     }
 
     public int getValX() {
@@ -56,29 +74,29 @@ public class Cell extends Rectangle {
         return everShot;
     }
 
-    public void setEverShot(boolean everShot) {
-        this.everShot = everShot;
+    public void setClicked() {
+        this.everShot = true;
     }
 
     public boolean isPlayerCell() {
         return isPlayerCell;
     }
 
-    public boolean isNeighbour() {
-        return isNeighbour;
+    public boolean isNeighbor() {
+        return isNeighbor;
     }
 
-    public void setNeighbour(boolean neighbour) {
-        isNeighbour = neighbour;
+    public void setNeighbor(boolean neighbor) {
+        isNeighbor = neighbor;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Cell cell = (Cell) o;
-        return x == cell.x &&
-                y == cell.y;
+        Cell c = (Cell) o;
+        return x == c.x &&
+                y == c.y;
     }
 
     @Override
@@ -88,6 +106,6 @@ public class Cell extends Rectangle {
 
     @Override
     public String toString() {
-        return "(" + x + "," + y +')';
+        return "(" + x + "," + y + ") clicked(" + everShot + "), isNeighbour(" + isNeighbor + "), Ship(" + ship + ")";
     }
 }

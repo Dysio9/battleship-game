@@ -121,11 +121,6 @@ public class Ship {
     }
 
     public void showAllCoordinates() {
-        System.out.print("Koordynaty statku " + masts + "masztowego:");
-        System.out.print("[" + y + "," + x + "]");
-        System.out.print("[" + y1 + "," + x1 + "]");
-        System.out.print("[" + y2 + "," + x2 + "]");
-        System.out.print("[" + y3 + "," + x3 + "]\n");
         System.out.print("Nowe koordynaty statku " + masts + "masztowego:");
         System.out.print("[" + yArray[0] + "," + xArray[0] + "]");
         if (masts >= 2) System.out.print("[" + yArray[1] + "," + xArray[1] + "]");
@@ -136,8 +131,6 @@ public class Ship {
 
     @Override
     public String toString() {
-        return "Ship{" +
-                "masts=" + masts +
-                '}';
+        return "masts=" + masts + '}';
     }
 }

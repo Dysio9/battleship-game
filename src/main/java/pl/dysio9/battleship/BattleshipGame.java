@@ -12,13 +12,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BattleshipGame extends Application {
     private boolean showOpponentFleet = true;
@@ -26,6 +24,8 @@ public class BattleshipGame extends Application {
     private Constants constants = Constants.getInstance();
     private Map<Cell, Ship> playerShips = controller.getPlayerShips();
     private Map<Cell, Ship> opponentShips = controller.getOpponentShips();
+    GridPane playgroundGridPlayer = controller.getPlaygroundGridPlayer();
+    GridPane playgroundGridOpponent = controller.getPlaygroundGridOpponent();
 
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
     private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
@@ -35,8 +35,6 @@ public class BattleshipGame extends Application {
     private Image ship3mastSunk = new Image("file:src/main/resources/ship3mast-sunk.png");
     private Image ship2mastSunk = new Image("file:src/main/resources/ship2mast-sunk.png");
     private Image ship1mastSunk = new Image("file:src/main/resources/ship1mast-sunk.png");
-    GridPane playgroundGridPlayer;
-    GridPane playgroundGridOpponent;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -132,10 +130,13 @@ public class BattleshipGame extends Application {
         BorderPane.setAlignment(nextRoundButton, Pos.CENTER);
 
         randomButton.setOnAction(e -> {
+//            controller.fillMapWithEmptyCells(true);
             controller.placeShipsRandomly(true);
-            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+//            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+            controller.createPlaygroundGridPane(playerShips, playgroundGridPlayer,true);
             controller.placeShipsRandomly(false);
-            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+//            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+            controller.createPlaygroundGridPane(opponentShips, playgroundGridOpponent, false);
             menuLabel.setText("Ships have been placed \n start the game");
 
 //            System.out.println("Statki playera:");
@@ -152,10 +153,10 @@ public class BattleshipGame extends Application {
         });
 
         startButton.setOnAction(e -> {
-            System.out.println("Statki playera:");
-            playerShips.entrySet().stream()
-                    .map(a -> a.getKey().getValX() +","+a.getKey().getValY()+" jest sąsiadem("+a.getKey().isNeighbour()+") Statek:"+a.getValue())
-                    .forEach(System.out::println);
+//            System.out.println("Statki playera:");
+//            playerShips.entrySet().stream()
+//                    .map(a -> a.getKey().getValX() +","+a.getKey().getValY()+" jest sąsiadem("+a.getKey().isNeighbor()+") Statek:"+a.getValue())
+//                    .forEach(System.out::println);
 
             if (controller.shipsArePlaced(true) && controller.shipsArePlaced(false)) {
                 controller.setPlayerTurn(true);
@@ -209,11 +210,13 @@ public class BattleshipGame extends Application {
         middlePanel.setRight(fleetOpponent);
 
 //// --------------------------------------- Bottom Section -----------------------------------------
-        playgroundGridPlayer = new GridPane();
-        controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+//        GridPane playgroundGridPlayer = controller.createPlaygroundGridPane(true);
+//        controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+        controller.createPlaygroundGridPane(playerShips, playgroundGridPlayer,true);
 
-        playgroundGridOpponent = new GridPane();
-        controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+//        GridPane playgroundGridOpponent = controller.createPlaygroundGridPane(false);
+//        controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+        controller.createPlaygroundGridPane(opponentShips, playgroundGridOpponent,false);
 
         BorderPane bottomPanel = new BorderPane();
         bottomPanel.setLeft(playgroundGridPlayer);

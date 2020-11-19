@@ -5,8 +5,8 @@ import javafx.scene.paint.ImagePattern;
 
 public class Constants {
     private static Constants instanceConstants = null;
-    private boolean showOpponentFleet = false;
-    private boolean showNeighbors = false;
+    private boolean showOpponentFleet = true;
+    private boolean showNeighbors = true;
 
     private Image backgroundImage = new Image("file:src/main/resources/background2.png");
     private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
@@ -22,6 +22,7 @@ public class Constants {
     Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
     private Image shotNegativeImage = new Image("file:src/main/resources/shoot-negative.png");
     private Image shotPositiveImage = new Image("file:src/main/resources/shoot-positive.png");
+    private Image cellTransparentImage = new Image("file:src/main/resources/cellTransparent.png");
 
     private String menuLabelTextDefault = "Place your ships\nor press random.";
     private String menuLabelTextPlayerTurn = "Player turn.\n Choose a target on\n the opponent's grid.";
@@ -55,6 +56,10 @@ public class Constants {
 
     public ImagePattern getShotPositiveImage() {
         return new ImagePattern(shotPositiveImage);
+    }
+
+    public ImagePattern getCellTransparentImage() {
+        return new ImagePattern(cellTransparentImage);
     }
 
     public String getMenuLabelTextDefault() {
