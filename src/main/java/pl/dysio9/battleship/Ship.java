@@ -1,6 +1,5 @@
 package pl.dysio9.battleship;
 
-
 public class Ship {
     private int x, x1 = -1, x2 = -1 ,x3 = -1;
     private int y ,y1 = -1, y2 = -1, y3 = -1;
@@ -131,6 +130,11 @@ public class Ship {
 
     @Override
     public String toString() {
-        return "masts=" + masts + '}';
+        if (isHorizontalPosition()) {
+//            return String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(masts) + " true");
+            return x + " " + y + " " + masts + " true";
+        } else {
+            return x + " " + y + " " + masts + " false";
+        }
     }
 }

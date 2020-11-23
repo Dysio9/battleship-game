@@ -94,9 +94,13 @@ public class BattleshipGame extends Application {
         randomButton.setPrefWidth(190);
 
         Label menuTopLabel = new Label("New Game");
-        Button modeButton = new Button("Clear Total Scores");
-        modeButton.setPrefWidth(190);
-        VBox menuTopVBox = new VBox(menuTopLabel, modeButton);
+        Button newGameButton = new Button("Clear Total Scores");
+        newGameButton.setPrefWidth(190);
+        Button loadButton = new Button("Load");
+        loadButton.setPrefWidth(190);
+        Button saveButton = new Button("Save");
+        saveButton.setPrefWidth(190);
+        VBox menuTopVBox = new VBox(menuTopLabel, newGameButton, loadButton, saveButton);
         menuTopVBox.setAlignment(Pos.CENTER);
         menuTopVBox.setPadding(new Insets(2, 0, 2, 0));
         menuTopVBox.setSpacing(2);
@@ -109,7 +113,7 @@ public class BattleshipGame extends Application {
         Button surrenderButton = new Button("Surrender");
         controller.setSurrenderButton(surrenderButton);
         surrenderButton.setPrefWidth(190);
-        Button howToPlayButton = new Button("Player win this round");
+        Button howToPlayButton = new Button("Player Win this round");
         howToPlayButton.setPrefWidth(190);
         Button nextRoundButton = new Button("Play another round");
         controller.setNextRoundButton(nextRoundButton);
@@ -144,14 +148,23 @@ public class BattleshipGame extends Application {
 //                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot())
 //                    .forEach(System.out::println);
         });
-        modeButton.setOnAction(e -> {
+        newGameButton.setOnAction(e -> {
             controller.clearTotalScores();
 ////            placePlayerShips();
 //            controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
 ////            placeOpponentShips();
 //            controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
         });
+        loadButton.setOnAction(e -> {
+            controller.loadTotalScores();
+//            controller.setTotalScoreOpponentLabel(controller.loadTotalScores());
 
+        });
+        saveButton.setOnAction(e -> {
+            controller.saveTotalScores();
+//            controller.setTotalScoreOpponentLabel(controller.saveTotalScores());
+
+        });
         startButton.setOnAction(e -> {
 //            System.out.println("Statki playera:");
 //            playerShips.entrySet().stream()
@@ -212,10 +225,12 @@ public class BattleshipGame extends Application {
 //// --------------------------------------- Bottom Section -----------------------------------------
 //        GridPane playgroundGridPlayer = controller.createPlaygroundGridPane(true);
 //        controller.updatePlaygroundGrid(playerShips, playgroundGridPlayer, true);
+//        controller.fillCellsListWithEmptyCells(true);
         controller.createPlaygroundGridPane(playerShips, playgroundGridPlayer,true);
 
 //        GridPane playgroundGridOpponent = controller.createPlaygroundGridPane(false);
 //        controller.updatePlaygroundGrid(opponentShips, playgroundGridOpponent, false);
+//        controller.fillCellsListWithEmptyCells(false);
         controller.createPlaygroundGridPane(opponentShips, playgroundGridOpponent,false);
 
         BorderPane bottomPanel = new BorderPane();
@@ -245,7 +260,7 @@ public class BattleshipGame extends Application {
         totalScoreTextLabel.setTextFill(Color.web("#0d1ea7"));
 
         Label totalScorePlayerLabel = new Label(String.valueOf(controller.getTotalScorePlayer()));
-        controller.setPlayerTotalScoreBoard(totalScorePlayerLabel);
+        controller.setTotalScorePlayerLabel(totalScorePlayerLabel);
         totalScorePlayerLabel.setFont(new Font("Arial", 36));
         totalScorePlayerLabel.setTextFill(Color.web("#0d1ea7"));
         VBox totalScoreVBox;

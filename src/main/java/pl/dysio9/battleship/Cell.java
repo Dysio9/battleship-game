@@ -3,7 +3,6 @@ package pl.dysio9.battleship;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
-import java.awt.*;
 import java.util.Objects;
 
 public class Cell extends Rectangle {
@@ -106,6 +105,10 @@ public class Cell extends Rectangle {
 
     @Override
     public String toString() {
-        return "(" + x + "," + y + ") clicked(" + everShot + "), isNeighbour(" + isNeighbor + "), Ship(" + ship + ")";
+        if (ship != null) {
+            return "(" + x + "," + y + ") clicked(" + everShot + "), isNeighbour(" + isNeighbor + "), Ship(" + ship + ")";
+        } else {
+            return "(" + x + "," + y + ") clicked(" + everShot + "), isNeighbour(" + isNeighbor + "), Ship(null)";
+        }
     }
 }
