@@ -1,8 +1,8 @@
 package pl.dysio9.battleship;
 
+import static pl.dysio9.battleship.Constants.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,29 +14,29 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
 
+
 public class Controller {
-    private Constants constants = Constants.getInstance();
-    Random random = new Random();
-    private int totalScorePlayer = 0;
-    private int totalScoreOpponent = 0;
-    private boolean playerTurn;
-    private boolean gameStarted = false;
+    private static Controller instance = null;
+    private final Random random = new Random();
     private Map<Cell, Ship> playerShips = new HashMap<>();
     private Map<Cell, Ship> opponentShips = new HashMap<>();
-    List<Cell> playgroundPlayerList = new ArrayList<>();
-    List<Cell> playgroundOpponentList = new ArrayList<>();
+    private List<Cell> playgroundPlayerList = new ArrayList<>();
+    private List<Cell> playgroundOpponentList = new ArrayList<>();
+    private GridPane playgroundGridPlayer = new GridPane();
+    private GridPane playgroundGridOpponent = new GridPane();
+    private int totalScorePlayer = 0;
+    private int totalScoreOpponent = 0;
+    private boolean gameStarted = false;
 
-    private static Controller instance = null;
+    private boolean playerTurn;
     private Label menuLabel;
     private Label totalScorePlayerLabel;
     private Label totalScoreOpponentLabel;
-    Button randomButton;
-    Button startButton;
-    Button nextRoundButton;
-    Button surrenderButton;
-    BorderPane menuMiddleSection;
-    GridPane playgroundGridPlayer = new GridPane();
-    GridPane playgroundGridOpponent = new GridPane();
+    private Button randomButton;
+    private Button startButton;
+    private Button nextRoundButton;
+    private Button surrenderButton;
+    private BorderPane menuMiddleSection;
 
     private Controller() {
         // Exists only to defeat instantiation.
@@ -325,7 +325,7 @@ public class Controller {
                 if (shipsMap.containsKey(cell)) {
                     cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
                     cell.setStroke(Color.BLACK);
-                    if (constants.showOpponentFleet() || isPlayers) {
+                    if (SHOW_OPPONENT_FLEET || isPlayers) {
                         if (shipsMap.get(cell) != null) {
 //                            if (shipsMap.get(cell).isSunk()) {
 //                                cell.setFill(Color.RED);
@@ -343,10 +343,10 @@ public class Controller {
                         cell.setNeighbor(true);
                     }
                     if (cell.wasEverShot()) {
-                        cell.setFill(constants.getShotNegativeImage());
+                        cell.setFill(SHOT_NEGATIVE_IMAGE);
                     } else {
                         if (allNeighbors.contains(cell)) {
-                            if (constants.showNeighbors()) {
+                            if (SHOW_NEIGHBORS) {
                                 cell.setFill(Color.LIGHTGOLDENRODYELLOW);
                             } else {
                                 cell.setFill(Color.TRANSPARENT);
@@ -373,71 +373,30 @@ public class Controller {
 
     public GridPane createPlaygroundGridPane(Map<Cell,Ship> shipsMap, GridPane playgroundGrid, boolean isPlayers) {
         playgroundGrid.getChildren().clear();
-        List<Cell> cells;
+        List<Cell> cells = isPlayers ? playgroundPlayerList : playgroundOpponentList;
 
         if (shipsMap.isEmpty()) {
             fillCellsListWithEmptyCells(isPlayers);
         }
 
-        if (isPlayers) {
-            cells = playgroundPlayerList;
-        } else {
-            cells = playgroundOpponentList;
-        }
-
         for (Cell cell : cells) {
-            if (cell.isPlayerCell() == isPlayers) {
                 cell.setFill(Color.TRANSPARENT);
                 cell.setStroke(Color.BLACK);
                 if (cell.isThereAShip()) {
-                    cell.setFill(Color.BLUE);
+                    if (cell.isPlayerCell()) {
+                        cell.setFill(Color.BLUE);
+                    } else if (SHOW_OPPONENT_FLEET) {
+                        cell.setFill(Color.BLUE);
+                    }
                 } else {
                     if (cell.isNeighbor()) {
-                        if (constants.showNeighbors()) {
+                        if (SHOW_NEIGHBORS) {
                             cell.setFill(Color.LIGHTBLUE);
                         }
                     }
                 }
-
                 playgroundGrid.add(cell, cell.getValX(), cell.getValY());
-            }
         }
-
-//        fillCellsListWithEmptyCells(isPlayers);
-
-//        for (int i = 0; i < 10; i++) {
-//            for (int j = 0; j < 10; j++) {
-//                Cell cell = new Cell(i,j,isPlayers);
-//                cell.setFill(Color.TRANSPARENT);
-//                cell.setStroke(Color.BLACK);
-//                if (shipsMap.containsKey(cell)) {
-//                    cell = new Cell(i,j,shipsMap.get(cell),isPlayers);
-//                    if (!constants.showOpponentFleet() && !cell.isPlayerCell()) {
-//                        cell.setFill(Color.TRANSPARENT);
-//                    } else {
-//                        cell.setFill(Color.BLUE);
-//                    }
-////                    cell.setFill(cell.getCellFill());
-//                    cell.setStroke(Color.BLACK);
-//                } else {
-//                    if (getAllNeighbors(shipsMap,isPlayers).contains(cell)) {
-//                        cell.setNeighbor(true);
-//                        if (constants.showNeighbors()) {
-//                            cell.setFill(Color.LIGHTBLUE);
-//                        }
-//                    }
-//                }
-//                playgroundGrid.add(cell,i,j);
-//
-//                if (isPlayers) {
-//                    playgroundPlayerList.remove(cell);
-//                    playgroundPlayerList.add(cell);
-//                } else {
-//                    playgroundOpponentList.remove(cell);
-//                    playgroundOpponentList.add(cell);
-//                }
-//            }
-//        }
         playgroundGrid.setGridLinesVisible(true);
         playgroundGrid.setPrefSize(380.0, 380.0);
 
@@ -461,19 +420,19 @@ public class Controller {
                         System.out.println("Player Turn: " + isPlayerTurn());
                         cell.setClicked();
                         if (cell.isThereAShip()) {
-                            cell.setFill(constants.getShotPositiveImage());
+                            cell.setFill(SHOT_POSITIVE_IMAGE);
                             cell.getShip().hit();
                             System.out.println("Unsunk player(" + isPlayerTurn() + ") cells No: " + getUnsunkCellsCount(isPlayerTurn()));
                             if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
                                 roundWin();
                             }
                         } else {
-                            cell.setFill(constants.getShotNegativeImage());
+                            cell.setFill(SHOT_NEGATIVE_IMAGE);
                             setPlayerTurn(!isPlayerTurn());
                             if (isPlayerTurn()) {
-                                menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+                                menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
                             } else {
-                                menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+                                menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                             }
                             opponentShoot();
                         }
@@ -519,19 +478,19 @@ public class Controller {
             }
 
             if (computerChoiceCell.isThereAShip()) {
-                computerChoiceCell.setFill(constants.getShotPositiveImage());
+                computerChoiceCell.setFill(SHOT_POSITIVE_IMAGE);
                 computerChoiceCell.getShip().hit();
                 System.out.println("Unsunk player(" + isPlayerTurn() + ") cells No: " + getUnsunkCellsCount(isPlayerTurn()));
                 if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
                     roundLost();
                 }
             } else {
-                computerChoiceCell.setFill(constants.getShotNegativeImage());
+                computerChoiceCell.setFill(SHOT_NEGATIVE_IMAGE);
                 setPlayerTurn(!isPlayerTurn());
                 if (isPlayerTurn()) {
-                    menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+                    menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
                 } else {
-                    menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+                    menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                 }
             }
         } while (!isPlayerTurn());
@@ -571,9 +530,9 @@ public class Controller {
 
     public void getDefaultMenuLabel() {
         if (playerTurn) {
-            menuLabel.setText(constants.getMenuLabelTextPlayerTurn());
+            menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
         } else  {
-            menuLabel.setText(constants.getMenuLabelTextOpponentTurn());
+            menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
         }
     }
 

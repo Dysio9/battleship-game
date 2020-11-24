@@ -1,80 +1,80 @@
 package pl.dysio9.battleship;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.ImagePattern;
 
 public class Constants {
-    private static Constants instanceConstants = null;
-    private boolean showOpponentFleet = true;
-    private boolean showNeighbors = true;
+    public static final boolean SHOW_OPPONENT_FLEET = true;
+    public static final boolean SHOW_NEIGHBORS = false;
 
-    private Image backgroundImage = new Image("file:src/main/resources/background2.png");
-    private Image ship4mast = new Image("file:src/main/resources/ship4mast.png");
-    private Image ship3mast = new Image("file:src/main/resources/ship3mast.png");
-    private Image ship2mast = new Image("file:src/main/resources/ship2mast.png");
-    private Image ship1mast = new Image("file:src/main/resources/ship1mast.png");
-    private Image ship4mastSunk = new Image("file:src/main/resources/ship4mast-sunk.png");
-    private Image ship3mastSunk = new Image("file:src/main/resources/ship3mast-sunk.png");
-    private Image ship2mastSunk = new Image("file:src/main/resources/ship2mast-sunk.png");
-    private Image ship1mastSunk = new Image("file:src/main/resources/ship1mast-sunk.png");
+    public static final Image BACKGROUND_IMAGE = new Image("file:src/main/resources/background2.png");
+    public static final ImageView SHIP_4_MAST = new ImageView(new Image("file:src/main/resources/ship4mast.png"));
+    public static final Image SHIP_3_MAST = new Image("file:src/main/resources/ship3mast.png");
+    public static final Image SHIP_2_MAST = new Image("file:src/main/resources/ship2mast.png");
+    public static final Image SHIP_1_MAST = new Image("file:src/main/resources/ship1mast.png");
+    public static final Image SHIP_4_MAST_SUNK = new Image("file:src/main/resources/ship4mast-sunk.png");
+    public static final Image SHIP_3_MAST_SUNK = new Image("file:src/main/resources/ship3mast-sunk.png");
+    public static final Image SHIP_2_MAST_SUNK = new Image("file:src/main/resources/ship2mast-sunk.png");
+    public static final Image SHIP_1_MAST_SUNK = new Image("file:src/main/resources/ship1mast-sunk.png");
 
-    Image shipImage = new Image("file:src/main/resources/ship1mast.png");
-    Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
-    private Image shotNegativeImage = new Image("file:src/main/resources/shoot-negative.png");
-    private Image shotPositiveImage = new Image("file:src/main/resources/shoot-positive.png");
-    private Image cellTransparentImage = new Image("file:src/main/resources/cellTransparent.png");
+    public static final Image shipImage = new Image("file:src/main/resources/ship1mast.png");
+    public static final Image shipSunkImage = new Image("file:src/main/resources/ship1mast-sunk.png");
+    public static final ImagePattern SHOT_NEGATIVE_IMAGE = new ImagePattern(new Image("file:src/main/resources/shoot-negative.png"));
+    public static final ImagePattern SHOT_POSITIVE_IMAGE = new ImagePattern(new Image("file:src/main/resources/shoot-positive.png"));
+    public static final ImagePattern CELL_TRANSPARENT_IMAGE = new ImagePattern(new Image("file:src/main/resources/cellTransparent.png"));
 
-    private String menuLabelTextDefault = "Place your ships\nor press random.";
-    private String menuLabelTextPlayerTurn = "Player turn.\n Choose a target on\n the opponent's grid.";
-    private String menuLabelTextOpponentTurn = "Opponent Turn.\nPlease wait...";
-    private String menuLabelTestSurrender = "You have surrender!\nTry the next time.";
+    public static final String MENU_LABEL_TEXT_DEFAULT = "Place your ships\nor press random.";
+    public static final String MENU_LABEL_TEXT_PLAYER_TURN = "Player turn.\n Choose a target on\n the opponent's grid.";
+    public static final String MENU_LABEL_TEXT_OPPONENT_TURN = "Opponent Turn.\nPlease wait...";
+    public static final String MENU_LABEL_TEXT_SURRENDER = "You have surrender!\nTry the next time.";
 
     private Constants() {}
 
-    public static Constants getInstance() {
-        if(instanceConstants == null) {
-            instanceConstants = new Constants();
-        }
-        return instanceConstants;
-    }
-
-    public boolean showOpponentFleet() {
-        return showOpponentFleet;
-    }
-
-    public boolean showNeighbors() {
-        return showNeighbors;
-    }
-
-    public Image getBackgroundImage() {
-        return backgroundImage;
-    }
-
-    public ImagePattern getShotNegativeImage() {
-        return new ImagePattern(shotNegativeImage);
-    }
-
-    public ImagePattern getShotPositiveImage() {
-        return new ImagePattern(shotPositiveImage);
-    }
-
-    public ImagePattern getCellTransparentImage() {
-        return new ImagePattern(cellTransparentImage);
-    }
-
-    public String getMenuLabelTextDefault() {
-        return menuLabelTextDefault;
-    }
-
-    public String getMenuLabelTextPlayerTurn() {
-        return menuLabelTextPlayerTurn;
-    }
-
-    public String getMenuLabelTextOpponentTurn() {
-        return menuLabelTextOpponentTurn;
-    }
-
-    public String getMenuLabelTextSurrender() {
-        return menuLabelTestSurrender;
-    }
+////    public static Constants getInstance() {
+////        if(instanceConstants == null) {
+////            instanceConstants = new Constants();
+////        }
+////        return instanceConstants;
+////    }
+//
+//    public boolean showOpponentFleet() {
+//        return SHOW_OPPONENT_FLEET;
+//    }
+//
+//    public boolean showNeighbors() {
+//        return SHOW_NEIGHBORS;
+//    }
+//
+//    public Image getBackgroundImage() {
+//        return BACKGROUND_IMAGE;
+//    }
+//
+//    public ImagePattern getShotNegativeImage() {
+//        return new ImagePattern(SHOT_NEGATIVE_IMAGE);
+//    }
+////
+////    public ImagePattern getShotPositiveImage() {
+////        return new ImagePattern(SHOT_POSITIVE_IMAGE);
+////    }
+//
+//    public ImagePattern getCellTransparentImage() {
+//        return new ImagePattern(CELL_TRANSPARENT_IMAGE);
+//    }
+//
+//    public String getMenuLabelTextDefault() {
+//        return MENU_LABEL_TEXT_DEFAULT;
+//    }
+//
+//    public String getMenuLabelTextPlayerTurn() {
+//        return MENU_LABEL_TEXT_PLAYER_TURN;
+//    }
+//
+//    public String getMenuLabelTextOpponentTurn() {
+//        return MENU_LABEL_TEXT_OPPONENT_TURN;
+//    }
+//
+//    public String getMenuLabelTextSurrender() {
+//        return MENU_LABEL_TEST_SURRENDER;
+//    }
 }

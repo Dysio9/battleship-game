@@ -1,13 +1,15 @@
 package pl.dysio9.battleship;
 
+import static pl.dysio9.battleship.Constants.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Objects;
 
+
 public class Cell extends Rectangle {
     private Controller controller = Controller.getInstance();
-    private Constants constants = Constants.getInstance();
+//    private Constants constants = Constants.getInstance();
     private int x;
     private int y;
     private Ship ship;
@@ -36,15 +38,15 @@ public class Cell extends Rectangle {
     public ImagePattern getCellFill() {
         if (ship != null) {
             if (everShot) {
-                return constants.getShotPositiveImage();
+                return SHOT_POSITIVE_IMAGE;
             } else {
-                return constants.getCellTransparentImage();
+                return CELL_TRANSPARENT_IMAGE;
             }
         } else {
             if (everShot) {
-                return constants.getShotNegativeImage();
+                return SHOT_NEGATIVE_IMAGE;
             } else {
-                return constants.getCellTransparentImage();
+                return CELL_TRANSPARENT_IMAGE;
             }
         }
     }
