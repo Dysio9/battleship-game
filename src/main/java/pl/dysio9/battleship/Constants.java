@@ -24,7 +24,7 @@ public class Constants {
     public static final ImagePattern SHOT_POSITIVE_IMAGE = new ImagePattern(new Image("file:src/main/resources/shoot-positive.png"));
     public static final ImagePattern CELL_TRANSPARENT_IMAGE = new ImagePattern(new Image("file:src/main/resources/cellTransparent.png"));
 
-    public static final String MENU_LABEL_TEXT_DEFAULT = "Place your ships\nor press random.";
+    public static final String MENU_LABEL_TEXT_DEFAULT = "Place your ships\n pressing random.";
     public static final String MENU_LABEL_TEXT_PLAYER_TURN = "Player turn.\n Choose a target on\n the opponent's grid.";
     public static final String MENU_LABEL_TEXT_OPPONENT_TURN = "Opponent Turn.\nPlease wait...";
     public static final String MENU_LABEL_TEXT_SURRENDER = "You have surrender!\nTry the next time.";

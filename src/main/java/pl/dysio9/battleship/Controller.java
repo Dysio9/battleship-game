@@ -7,12 +7,15 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javafx.animation.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-
+import javafx.util.Duration;
 
 
 public class Controller {
@@ -176,13 +179,7 @@ public class Controller {
     }
 
     public boolean canPlaceShip (Ship ship, boolean player) {
-        Map<Cell, Ship> ships;
-
-        if (player) {
-            ships = playerShips;
-        } else {
-            ships = opponentShips;
-        }
+        Map<Cell, Ship> ships = player ? playerShips : opponentShips;
 
         if (ships.size() == 0) {
             if (!isValidCell(ship.getXCoordinates(ship.getMasts()-1), ship.getYCoordinates(ship.getMasts()-1))) {
@@ -313,64 +310,6 @@ public class Controller {
         return placedShipsCounter == 20;
     }
 
-    public GridPane updatePlaygroundGrid(Map<Cell, Ship> shipsMap, GridPane playgroundGridOfPerson, boolean isPlayers) {
-        List <Cell> allNeighbors = getAllNeighbors(shipsMap,isPlayers);
-
-        playgroundGridOfPerson.getChildren().clear();
-// przy zapisie do pliku spróbować impl interfejs serializable lub własne kodowanie np 11-RED-Shooted-
-        for (int x = 0; x < 10; x++) {
-            for (int y = 0; y < 10; y++) {
-                Cell cell = new Cell(x,y, isPlayers, false);
-                cell.setStroke(Color.BLACK);
-                if (shipsMap.containsKey(cell)) {
-                    cell = new Cell(x, y, shipsMap.get(cell), isPlayers);
-                    cell.setStroke(Color.BLACK);
-                    if (SHOW_OPPONENT_FLEET || isPlayers) {
-                        if (shipsMap.get(cell) != null) {
-//                            if (shipsMap.get(cell).isSunk()) {
-//                                cell.setFill(Color.RED);
-//                            } else {
-                                cell.setFill(Color.LIGHTBLUE);
-//                            }
-                        } else {
-                            cell.setFill(Color.YELLOW);
-                        }
-                    } else {
-                        cell.setFill(Color.TRANSPARENT);
-                    }
-                } else {
-                    if (allNeighbors.contains(cell)) {
-                        cell.setNeighbor(true);
-                    }
-                    if (cell.wasEverShot()) {
-                        cell.setFill(SHOT_NEGATIVE_IMAGE);
-                    } else {
-                        if (allNeighbors.contains(cell)) {
-                            if (SHOW_NEIGHBORS) {
-                                cell.setFill(Color.LIGHTGOLDENRODYELLOW);
-                            } else {
-                                cell.setFill(Color.TRANSPARENT);
-                            }
-                        } else {
-                            cell.setFill(Color.TRANSPARENT);
-                        }
-                        cell.setStroke(Color.BLACK);
-                    }
-                }
-                playgroundGridOfPerson.add(cell, x, y);
-            }
-        }
-
-//        for (Cell c : allNeighbors) {
-//            c.setNeighbor(true);
-//            shipsMap.put(c, null);
-//        }
-        playgroundGridOfPerson.setGridLinesVisible(true);
-        playgroundGridOfPerson.setPrefSize(380.0, 380.0);
-
-        return playgroundGridOfPerson;
-    }
-
     public GridPane createPlaygroundGridPane(Map<Cell,Ship> shipsMap, GridPane playgroundGrid, boolean isPlayers) {
         playgroundGrid.getChildren().clear();
         List<Cell> cells = isPlayers ? playgroundPlayerList : playgroundOpponentList;
@@ -413,7 +352,7 @@ public class Controller {
      public void cellClicked(Cell cell) {
         System.out.println("Clicked x=" + cell.getValX()+ " y=" + cell.getValY());
 
-//        if (playerTurn) {
+        if (playerTurn) {
             if (gameStarted) {
                 if (cell.isPlayerCell() != isPlayerTurn()) {
                     if (!cell.wasEverShot()) {
@@ -434,17 +373,17 @@ public class Controller {
                             } else {
                                 menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                             }
-                            opponentShoot();
+                            opponentShoot(800);
                         }
 //                        System.out.println("Opponent cells:");
 //                        playgroundOpponentList.stream().forEach(System.out::println);
                     }
                 }
             }
-//        }
+        }
     }
 
-    public void opponentShoot() {
+    public void opponentShoot(double milliseconds) {
 // ------- wybieranie komórki z mapy statków ------------
 //        List<Map.Entry<Cell, Ship>> playersHiddenFields = playerShips.entrySet().stream()
 //                .filter(cell -> !cell.getKey().wasEverShot())
@@ -460,8 +399,8 @@ public class Controller {
 //        //do sth with this cell - marked as clicked, change the state & graphics etc.
 
 // ------- wybieranie komórki z listy wszystkich komórek do których jeszcze nie strzelano ------
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(milliseconds), event -> {
 
-        do {
             List<Cell> playersHiddenFields = playgroundPlayerList.stream()
                     .filter(cell -> !cell.wasEverShot())
                     .collect(Collectors.toList());
@@ -484,16 +423,20 @@ public class Controller {
                 if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
                     roundLost();
                 }
+                opponentShoot(milliseconds);
             } else {
                 computerChoiceCell.setFill(SHOT_NEGATIVE_IMAGE);
                 setPlayerTurn(!isPlayerTurn());
+
                 if (isPlayerTurn()) {
                     menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
                 } else {
                     menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                 }
             }
-        } while (!isPlayerTurn());
+        }));
+        timeline.setCycleCount(isPlayerTurn() ? Timeline.INDEFINITE : 0);
+        timeline.play();
     }
 
     public Map<Cell, Ship> getPlayerShips() {
@@ -518,10 +461,6 @@ public class Controller {
 
     public void setPlayerTurn(boolean playerTurn) {
         this.playerTurn = playerTurn;
-    }
-
-    public boolean isGameStarted() {
-        return gameStarted;
     }
 
     public void setGameStarted(boolean gameStarted) {
@@ -588,28 +527,12 @@ public class Controller {
         this.menuLabel = menuLabel;
     }
 
-    public void setPlaygroundGridPlayer(GridPane playgroundGridPlayer) {
-        this.playgroundGridPlayer = playgroundGridPlayer;
-    }
-
-    public void setPlaygroundGridOpponent(GridPane playgroundGridOpponent) {
-        this.playgroundGridOpponent = playgroundGridOpponent;
-    }
-
     public void setTotalScorePlayerLabel(Label totalScoreLabel) {
         this.totalScorePlayerLabel = totalScoreLabel;
     }
 
     public void setTotalScoreOpponentLabel(Label totalScoreOpponentLabel) {
         this.totalScoreOpponentLabel = totalScoreOpponentLabel;
-    }
-
-    public void setTotalScorePlayer(int totalScorePlayer) {
-        this.totalScorePlayer = totalScorePlayer;
-    }
-
-    public void setTotalScoreOpponent(int totalScoreOpponent) {
-        this.totalScoreOpponent = totalScoreOpponent;
     }
 
     public int getTotalScorePlayer() {
@@ -752,14 +675,10 @@ public class Controller {
     }
 
     public static void wait(int ms) {
-        try
-        {
-            Thread.sleep(ms);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
+//        Timeline timeline =
+//                new Timeline(new KeyFrame(Duration.millis(ms), e -> rect.setVisible(!rect.isVisible())));
+//        timeline.setCycleCount(Animation.INDEFINITE); // loop forever
+//        timeline.play();
     }
 
 }

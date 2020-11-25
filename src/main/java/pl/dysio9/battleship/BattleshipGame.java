@@ -51,8 +51,7 @@ public class BattleshipGame extends Application {
 
 // ------------------------------------------- Middle Section -------------------------------------------------
         HBox ships4masts = new HBox(SHIP_4_MAST);
-        HBox ships3masts = new HBox();
-        ships3masts.getChildren().addAll(new ImageView(SHIP_3_MAST), new ImageView(SHIP_3_MAST));
+        HBox ships3masts = new HBox(new ImageView(SHIP_3_MAST), new ImageView(SHIP_3_MAST));
         ships3masts.setSpacing(38.0);
         HBox ships2masts = new HBox(new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST));
         ships2masts.setSpacing(38.0);
@@ -79,12 +78,10 @@ public class BattleshipGame extends Application {
         fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
 
         // MenuBar section
-        Button randomButton = new Button();
-        randomButton.setText("Random");
+        Label menuTopLabel = new Label("New Game");
+        Button randomButton = new Button("Random");
         controller.setRandomButton(randomButton);
         randomButton.setPrefWidth(190);
-
-        Label menuTopLabel = new Label("New Game");
         Button newGameButton = new Button("Clear Total Scores");
         newGameButton.setPrefWidth(190);
         Button loadButton = new Button("Load");
