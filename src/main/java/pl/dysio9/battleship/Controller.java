@@ -8,8 +8,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import javafx.animation.*;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -29,7 +27,9 @@ public class Controller {
     private GridPane playgroundGridOpponent = new GridPane();
     private int totalScorePlayer = 0;
     private int totalScoreOpponent = 0;
+    private int difficultyLevel = 2;    // 1 - easy, 2 - medium, 3 - hard
     private boolean gameStarted = false;
+    private Deque<Cell> shotsHistory = new ArrayDeque<>();
 
     private boolean playerTurn;
     private Label menuLabel;
@@ -41,7 +41,7 @@ public class Controller {
     private Button surrenderButton;
     private BorderPane menuMiddleSection;
 
-    private Controller() {
+    public Controller() {
         // Exists only to defeat instantiation.
     }
 
@@ -53,13 +53,7 @@ public class Controller {
     }
 
     public void placeShipsRandomly(boolean player) {
-        Map<Cell, Ship> ships;
-
-        if (player) {
-            ships = playerShips;
-        } else {
-            ships = opponentShips;
-        }
+        Map<Cell, Ship> ships = player ? playerShips : opponentShips;
 
         ships.clear();
         fillCellsListWithEmptyCells(player);
@@ -97,8 +91,8 @@ public class Controller {
             }
         }
 
-        System.out.println("Statki playera (" + player + ") w Mapie:");
-        playerShips.entrySet().stream().forEach(System.out::println);
+//        System.out.println("Statki playera (" + player + ") w Mapie:");
+//        playerShips.entrySet().stream().forEach(System.out::println);
 //        System.out.println("Plansza playera (" + player + "):");
 //        playgroundGridPlayer.getChildren().stream().forEach(System.out::println);
     }
@@ -109,13 +103,15 @@ public class Controller {
             Cell cell = new Cell(ship.getXCoordinates(i), ship.getYCoordinates(i), ship, isPlayer);
             if (isPlayer) {
                 playerShips.put(cell, ship);
+                playgroundPlayerList.remove(cell);
                 playgroundPlayerList.add(cell);
             } else {
                 opponentShips.put(cell, ship);
+                playgroundOpponentList.remove(cell);
                 playgroundOpponentList.add(cell);
             }
         }
-        fillCellsListWithTheShips(isPlayer);
+//        fillCellsListWithTheShips(isPlayer);
     }
 
     public void fillCellsListWithEmptyCells(boolean player) {
@@ -148,12 +144,7 @@ public class Controller {
     }
 
     public void fillCellsListWithTheShips(boolean player) {
-        Map<Cell, Ship> shipsMap;
-        if (player) {
-            shipsMap = playerShips;
-        } else {
-            shipsMap = opponentShips;
-        }
+        Map<Cell, Ship> shipsMap = player ? playerShips : opponentShips;
 
         fillCellsListWithEmptyCells(player);
 
@@ -286,6 +277,45 @@ public class Controller {
         return neighborsAll.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
     }
 
+    public List<Cell> getCellsToShot() {
+        System.out.println("first element shotHistory: " + shotsHistory.peekFirst());
+        System.out.println("last element shotHistory: " + shotsHistory.peekLast());
+
+        if (shotsHistory.isEmpty() || difficultyLevel == 1) {
+            return playgroundPlayerList.stream()
+                    .filter(cell -> !cell.wasEverShot())
+                    .collect(Collectors.toList());
+        } else if (shotsHistory.size() == 1) {
+            return !findNonDiagonalNeighbors(shotsHistory.peekLast()).isEmpty() ?
+                    findNonDiagonalNeighbors(shotsHistory.peekLast()) :
+                    playgroundPlayerList.stream()
+                            .filter(cell -> !cell.wasEverShot())
+                            .collect(Collectors.toList());
+        } else {
+            List<Cell> cellsToShotList = new ArrayList<>();
+            cellsToShotList.addAll(findNonDiagonalNeighbors(shotsHistory.peekFirst()));
+            cellsToShotList.addAll(findNonDiagonalNeighbors(shotsHistory.peekLast()));
+            System.out.println("cells to shot " + cellsToShotList);
+
+            if (shotsHistory.peekFirst().getValX() == shotsHistory.peekLast().getValX()) {
+                cellsToShotList = cellsToShotList.stream()
+                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
+                        .filter(cell -> !cell.wasEverShot())
+                        .filter(cell -> cell.getValX() == shotsHistory.peekLast().getValX())
+                        .collect(Collectors.toList());
+            } else if (shotsHistory.peekFirst().getValY() == shotsHistory.peekLast().getValY()) {
+                cellsToShotList = cellsToShotList.stream()
+                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
+                        .filter(cell -> !cell.wasEverShot())
+                        .filter(cell -> cell.getValY() == shotsHistory.peekLast().getValY())
+                        .collect(Collectors.toList());
+            }
+            return cellsToShotList.size() > 0 ? cellsToShotList : playgroundPlayerList.stream()
+                    .filter(cell -> !cell.wasEverShot())
+                    .collect(Collectors.toList());
+        }
+    }
+
     public boolean isValidCell(int x, int y) {
         return x >= 0 && x < 10 && y >= 0 && y < 10;
     }
@@ -322,14 +352,20 @@ public class Controller {
                 cell.setFill(Color.TRANSPARENT);
                 cell.setStroke(Color.BLACK);
                 if (cell.isThereAShip()) {
-                    if (cell.isPlayerCell()) {
-                        cell.setFill(Color.BLUE);
-                    } else if (SHOW_OPPONENT_FLEET) {
-                        cell.setFill(Color.BLUE);
+                    if (cell.wasEverShot()) {
+                        cell.setFill(SHOT_POSITIVE_IMAGE);
+                    } else {
+                        if (cell.isPlayerCell()) {
+                            cell.setFill(Color.BLUE);
+                        } else if (SHOW_OPPONENT_FLEET) {
+                            cell.setFill(Color.BLUE);
+                        }
                     }
                 } else {
-                    if (cell.isNeighbor()) {
-                        if (SHOW_NEIGHBORS) {
+                    if (cell.wasEverShot()) {
+                        cell.setFill(SHOT_NEGATIVE_IMAGE);
+                    } else {
+                        if (cell.isNeighbor() && SHOW_NEIGHBORS) {
                             cell.setFill(Color.LIGHTBLUE);
                         }
                     }
@@ -345,7 +381,6 @@ public class Controller {
         } else {
             playgroundOpponentList.stream().forEach(System.out::println);
         }
-
         return playgroundGrid;
     }
 
@@ -373,17 +408,15 @@ public class Controller {
                             } else {
                                 menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                             }
-                            opponentShoot(800);
+                            opponentShoot(OPPONENT_DELAY);
                         }
-//                        System.out.println("Opponent cells:");
-//                        playgroundOpponentList.stream().forEach(System.out::println);
                     }
                 }
             }
         }
     }
 
-    public void opponentShoot(double milliseconds) {
+    public void opponentShootEasy(double milliseconds) {
 // ------- wybieranie komórki z mapy statków ------------
 //        List<Map.Entry<Cell, Ship>> playersHiddenFields = playerShips.entrySet().stream()
 //                .filter(cell -> !cell.getKey().wasEverShot())
@@ -398,13 +431,10 @@ public class Controller {
 //        Ship computerChoiceShip = computerChoiceEntry.getValue();
 //        //do sth with this cell - marked as clicked, change the state & graphics etc.
 
-// ------- wybieranie komórki z listy wszystkich komórek do których jeszcze nie strzelano ------
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(milliseconds), event -> {
-
             List<Cell> playersHiddenFields = playgroundPlayerList.stream()
                     .filter(cell -> !cell.wasEverShot())
                     .collect(Collectors.toList());
-
             int computerChoiceIndex = random.nextInt(playersHiddenFields.size());
             Cell computerChoiceCell = playersHiddenFields.get(computerChoiceIndex);
             computerChoiceCell.setClicked();
@@ -423,7 +453,7 @@ public class Controller {
                 if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
                     roundLost();
                 }
-                opponentShoot(milliseconds);
+                opponentShootEasy(milliseconds);
             } else {
                 computerChoiceCell.setFill(SHOT_NEGATIVE_IMAGE);
                 setPlayerTurn(!isPlayerTurn());
@@ -434,9 +464,112 @@ public class Controller {
                     menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
                 }
             }
+            System.out.println("---------------------------------------------------");
         }));
         timeline.setCycleCount(isPlayerTurn() ? Timeline.INDEFINITE : 0);
         timeline.play();
+    }
+
+    public void opponentShoot(double milliseconds) {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(milliseconds), event -> {
+            List<Cell> playersHiddenFields;
+            Cell computerChoiceCell;
+
+            if (gameStarted) {
+                playersHiddenFields = getCellsToShot();
+
+                System.out.println("playerhiddenFields: " + playersHiddenFields);
+                int computerChoiceIndex = random.nextInt(playersHiddenFields.size());
+                computerChoiceCell = playersHiddenFields.get(computerChoiceIndex);
+                computerChoiceCell.setClicked();
+
+                System.out.println("Wybór opponenta padł na: " + computerChoiceCell);
+                if (computerChoiceCell.getShip() != null) {
+                    System.out.println("Komórka do której strzela opponent zawiera statek.");
+                } else {
+                    System.out.println("Komórka do której strzela opponent nie zawiera statku");
+                }
+
+                if (computerChoiceCell.isThereAShip()) {
+                    computerChoiceCell.setFill(SHOT_POSITIVE_IMAGE);
+                    computerChoiceCell.getShip().hit();
+                    System.out.println("Unsunk player(" + isPlayerTurn() + ") cells No: " + getUnsunkCellsCount(isPlayerTurn()));
+                    shotsHistory.add(computerChoiceCell);
+                    System.out.println("shotsHistory in opponentShotMedium: " + shotsHistory);
+                    if (getUnsunkCellsCount(isPlayerTurn()) == 0) {
+                        roundLost();
+                    }
+                    opponentShoot(milliseconds);
+                } else {
+                    if (!shotsHistory.isEmpty() && shotsHistory.peekLast().getShip().isSunk()) {
+                        setNeighborsAsClicked(shotsHistory.peekLast().getShip());
+                        shotsHistory.clear();
+                    }
+                    computerChoiceCell.setFill(SHOT_NEGATIVE_IMAGE);
+                    setPlayerTurn(!isPlayerTurn());
+
+                    if (isPlayerTurn()) {
+                        menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
+                    } else {
+                        menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
+                    }
+                }
+                System.out.println("------------------------------------------");
+            }
+        }));
+        timeline.setCycleCount(isPlayerTurn() ? Timeline.INDEFINITE : 0);
+        timeline.play();
+    }
+
+    public List<Cell> findNonDiagonalNeighbors(Cell cell) {
+        List<Cell> resultList;
+
+//        List<Cell> neighborsList = getNeighbors(cell.getShip(),cell.isPlayerCell());
+
+        resultList = playgroundPlayerList.stream()
+//                .filter(c -> (c.getValX() == cell.getValX()))
+//                        .filter(c -> c.getValY() == cell.getValY()+1 || c.getValY() == cell.getValY()-1)
+//                        .filter(c -> c.getValY() == cell.getValY())
+//                        .filter(c -> c.getValX() == cell.getValX()+1 || c.getValX() == cell.getValX()-1)
+                .filter(c -> (c.getValX() == cell.getValX()
+                        && (c.getValY() == cell.getValY()+1 || c.getValY() == cell.getValY()-1))
+                        || (c.getValY() == cell.getValY()
+                        && (c.getValX() == cell.getValX()+1 || c.getValX() == cell.getValX()-1)))
+//                .filter(ce -> getNeighbors(cell.getShip(),cell.isPlayerCell()).contains(ce))
+//                .filter(c -> c.getValY() == cell.getValY()-1 || c.getValY() == cell.getValY()+1)
+                .filter(c -> isValidCell(cell.getValX(), cell.getValY()))
+                .filter(c -> !c.wasEverShot())
+                .collect(Collectors.toList());
+
+//        resultList.removeIf(neighborsList::contains);
+
+//        resultList = neighborsList.stream()
+//                .filter(c -> (c.getValX() == cell.getValX()
+//                        && (c.getValY() == cell.getValY()+1 || c.getValY() == cell.getValY()-1))
+//                        || (c.getValY() == cell.getValY()
+//                        && (c.getValX() == cell.getValX()+1 || c.getValX() == cell.getValX()-1)))
+//                .collect(Collectors.toList());
+
+        resultList.stream()
+                .map(c -> "FoundNonDiagonalCells: " + c.getValX() + "," + c.getValY())
+                .forEach(System.out::println);
+
+        return resultList;
+    }
+
+    public void setNeighborsAsClicked(Ship ship) {
+        List<Cell> cellList = playgroundPlayerList.stream()
+                .filter(cell -> getNeighbors(ship,true).contains(cell))
+                .collect(Collectors.toList());
+
+        for (Cell c : cellList) {
+            if (!c.wasEverShot()) {
+                c.setClicked();
+                if (SHOW_SUNK_SHIPS_NEIGHBORS) {
+                    c.setFill(SHOT_NEGATIVE_IMAGE);
+                }
+            }
+        }
     }
 
     public Map<Cell, Ship> getPlayerShips() {
@@ -543,6 +676,14 @@ public class Controller {
         return totalScoreOpponent;
     }
 
+    public void setDifficultyLevel(String difficultyLevel) {
+        if (difficultyLevel.equals("Difficulty: Easy")) {
+            this.difficultyLevel = 1;
+        } else if (difficultyLevel.equals("Difficulty: Medium")) {
+            this.difficultyLevel = 2;
+        }
+    }
+
     public void roundWin() {
         totalScorePlayer++;
 
@@ -556,7 +697,8 @@ public class Controller {
     }
 
     public void roundLost() {
-        setPlayerTurn(!isPlayerTurn());
+//        setPlayerTurn(!isPlayerTurn());
+//        playerTurn = true;
         totalScoreOpponent++;
         System.out.println("You've lost the round! Opponent score: " + totalScoreOpponent);
         totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
@@ -566,11 +708,21 @@ public class Controller {
         menuMiddleSection.setCenter(nextRoundButton);
     }
 
-    public void clearTotalScores() {
+    public void startNewGame() {
         totalScorePlayer = 0;
         totalScoreOpponent = 0;
         totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
         totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
+        gameStarted = false;
+        playerShips.clear();
+        opponentShips.clear();
+        fillCellsListWithEmptyCells(true);
+        fillCellsListWithEmptyCells(false);
+        createPlaygroundGridPane(playerShips,playgroundGridPlayer,true);
+        createPlaygroundGridPane(opponentShips,playgroundGridOpponent,false);
+        menuMiddleSection.getChildren().remove(surrenderButton);
+        menuMiddleSection.setCenter(nextRoundButton);
+        menuLabel.setText("The Game has been reset");
     }
 
     public void saveTotalScores() {
@@ -584,18 +736,6 @@ public class Controller {
                 .collect(Collectors.toList()));
 
         try {
-//            File file = new File("gameplay.list");
-//            if (!file.exists()) {
-//                file.createNewFile();
-//                System.out.println("\"gameplay.list\" file has been created");
-//            } else {
-//                System.out.println("File has already exist");
-//            }
-//            FileWriter writer = new FileWriter(file);
-//            writer.write(totalScorePlayer + " " + totalScoreOpponent + System.getProperty("line.separator"));
-//
-//            writer.close();
-
             Files.write(Paths.get("gameplay.list"), playgrounds);
         } catch (IOException e) {
             e.printStackTrace();
@@ -609,6 +749,8 @@ public class Controller {
         playerShips.clear();
         opponentShips.clear();
 
+        fillCellsListWithEmptyCells(true);
+        fillCellsListWithEmptyCells(false);
         try {
             File file = new File("gameplay.list");
             Scanner scanner = new Scanner(file);
@@ -618,6 +760,7 @@ public class Controller {
                 boolean isHorizontal;
                 Cell cell;
                 Ship ship;
+
 
                 lineString = scanner.nextLine();
                 String[] splited = lineString.split("\\s+");
@@ -636,8 +779,10 @@ public class Controller {
                             cell.setNeighbor(true);
                         }
                         if (i > 0 && i <= 100) {
+                            playgroundPlayerList.remove(cell);
                             playgroundPlayerList.add(cell);
                         } else {
+                            playgroundOpponentList.remove(cell);
                             playgroundOpponentList.add(cell);
                         }
                     } else {
@@ -651,8 +796,8 @@ public class Controller {
                     }
                 }
             }
-            fillCellsListWithTheShips(true);
-            fillCellsListWithTheShips(false);
+//            fillCellsListWithTheShips(true);
+//            fillCellsListWithTheShips(false);
             scanner.close();
 
             totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
@@ -673,12 +818,4 @@ public class Controller {
             e.printStackTrace();
         }
     }
-
-    public static void wait(int ms) {
-//        Timeline timeline =
-//                new Timeline(new KeyFrame(Duration.millis(ms), e -> rect.setVisible(!rect.isVisible())));
-//        timeline.setCycleCount(Animation.INDEFINITE); // loop forever
-//        timeline.play();
-    }
-
 }

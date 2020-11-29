@@ -7,6 +7,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
@@ -19,11 +20,11 @@ import javafx.stage.Stage;
 import java.util.*;
 
 public class BattleshipGame extends Application {
-    private Controller controller = Controller.getInstance();
-    private Map<Cell, Ship> playerShips = controller.getPlayerShips();
-    private Map<Cell, Ship> opponentShips = controller.getOpponentShips();
-    private GridPane playgroundGridPlayer = controller.getPlaygroundGridPlayer();
-    private GridPane playgroundGridOpponent = controller.getPlaygroundGridOpponent();
+    private final Controller controller = Controller.getInstance();
+    private final Map<Cell, Ship> playerShips = controller.getPlayerShips();
+    private final Map<Cell, Ship> opponentShips = controller.getOpponentShips();
+    private final GridPane playgroundGridPlayer = controller.getPlaygroundGridPlayer();
+    private final GridPane playgroundGridOpponent = controller.getPlaygroundGridOpponent();
 
 
     @Override
@@ -78,17 +79,20 @@ public class BattleshipGame extends Application {
         fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
 
         // MenuBar section
-        Label menuTopLabel = new Label("New Game");
+        ChoiceBox<String> difficultyLevelChoiceBox = new ChoiceBox<>();
+        difficultyLevelChoiceBox.getItems().addAll("Difficulty: Easy", "Difficulty: Medium");
+        difficultyLevelChoiceBox.setValue("Difficulty: Medium");
+        difficultyLevelChoiceBox.setPrefWidth(190);
         Button randomButton = new Button("Random");
         controller.setRandomButton(randomButton);
         randomButton.setPrefWidth(190);
-        Button newGameButton = new Button("Clear Total Scores");
+        Button newGameButton = new Button("New Game");
         newGameButton.setPrefWidth(190);
         Button loadButton = new Button("Load");
         loadButton.setPrefWidth(190);
         Button saveButton = new Button("Save");
         saveButton.setPrefWidth(190);
-        VBox menuTopVBox = new VBox(menuTopLabel, newGameButton, loadButton, saveButton);
+        VBox menuTopVBox = new VBox(newGameButton, difficultyLevelChoiceBox, loadButton, saveButton);
         menuTopVBox.setAlignment(Pos.CENTER);
         menuTopVBox.setPadding(new Insets(2, 0, 2, 0));
         menuTopVBox.setSpacing(2);
@@ -134,13 +138,14 @@ public class BattleshipGame extends Application {
 //                    .map(a -> a.getKey().getValX() + "," + a.getKey().getValY() + " - masztów:" + a.getValue().getMasts() + ", czy jest zatopiony:" + a.getValue().isSunk() + ", czy strzelano w to pole:" + a.getKey().wasEverShot())
 //                    .forEach(System.out::println);
         });
-        newGameButton.setOnAction(e -> controller.clearTotalScores());
+        newGameButton.setOnAction(e -> controller.startNewGame());
         loadButton.setOnAction(e -> controller.loadTotalScores());
         saveButton.setOnAction(e -> controller.saveTotalScores());
         startButton.setOnAction(e -> {
             if (controller.shipsArePlaced(true) && controller.shipsArePlaced(false)) {
                 controller.setPlayerTurn(true);
                 controller.setGameStarted(true);
+                controller.setDifficultyLevel(difficultyLevelChoiceBox.getValue());
                 menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
                 menuMiddleSection.getChildren().remove(randomButton);
                 menuMiddleSection.setBottom(surrenderButton);
@@ -162,9 +167,7 @@ public class BattleshipGame extends Application {
             menuMiddleSection.setCenter(randomButton);
             menuMiddleSection.setBottom(startButton);
         });
-        howToPlayButton.setOnAction(e -> {
-            controller.roundWin();
-        });
+        howToPlayButton.setOnAction(e -> controller.roundWin());
 
         BorderPane menubar = new BorderPane();
         menubar.setBorder(new Border(new BorderStroke(Color.BLACK,
@@ -203,7 +206,7 @@ public class BattleshipGame extends Application {
         grid.setCenter(middlePanel);
         grid.setBottom(bottomPanel);
 
-        Scene scene = new Scene(grid, 900, 760, Color.BLACK);
+        Scene scene = new Scene(grid, 900, 900, Color.BLACK);
 
         primaryStage.setMinHeight(900.0);
         primaryStage.setMinWidth(910.0);

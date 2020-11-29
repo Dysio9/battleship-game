@@ -17,9 +17,15 @@ repositories {
 }
 
 dependencies {
-
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.0'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.5.13'
 }
 
+test {
+    useJUnitPlatform()
+}
 
 
 // Build normally: gradle build (I've added to /home/dysio9/.gradle/gradle.properties path to java-11-oracle

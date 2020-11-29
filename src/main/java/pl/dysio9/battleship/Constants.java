@@ -7,6 +7,8 @@ import javafx.scene.paint.ImagePattern;
 public class Constants {
     public static final boolean SHOW_OPPONENT_FLEET = true;
     public static final boolean SHOW_NEIGHBORS = false;
+    public static final boolean SHOW_SUNK_SHIPS_NEIGHBORS = false;
+    public static final int OPPONENT_DELAY = 500;
 
     public static final Image BACKGROUND_IMAGE = new Image("file:src/main/resources/background2.png");
     public static final ImageView SHIP_4_MAST = new ImageView(new Image("file:src/main/resources/ship4mast.png"));
@@ -26,7 +28,7 @@ public class Constants {
 
     public static final String MENU_LABEL_TEXT_DEFAULT = "Place your ships\n pressing random.";
     public static final String MENU_LABEL_TEXT_PLAYER_TURN = "Player turn.\n Choose a target on\n the opponent's grid.";
-    public static final String MENU_LABEL_TEXT_OPPONENT_TURN = "Opponent Turn.\nPlease wait...";
+    public static final String MENU_LABEL_TEXT_OPPONENT_TURN = "Opponent Turn.\n\nPlease wait...";
     public static final String MENU_LABEL_TEXT_SURRENDER = "You have surrender!\nTry the next time.";
 
     private Constants() {}
