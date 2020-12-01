@@ -51,32 +51,6 @@ public class BattleshipGame extends Application {
         );
 
 // ------------------------------------------- Middle Section -------------------------------------------------
-        HBox ships4masts = new HBox(SHIP_4_MAST);
-        HBox ships3masts = new HBox(new ImageView(SHIP_3_MAST), new ImageView(SHIP_3_MAST));
-        ships3masts.setSpacing(38.0);
-        HBox ships2masts = new HBox(new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST));
-        ships2masts.setSpacing(38.0);
-        HBox ships1masts = new HBox(new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST));
-        ships1masts.setSpacing(38.0);
-
-        HBox ships4mastsOpponent = new HBox(new ImageView(SHIP_4_MAST_SUNK));
-        ships4mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships3mastsOpponent = new HBox(new ImageView(SHIP_3_MAST_SUNK), new ImageView(SHIP_3_MAST_SUNK));
-        ships3mastsOpponent.setSpacing(38.0);
-        ships3mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships2mastsOpponent = new HBox(new ImageView(SHIP_2_MAST_SUNK), new ImageView(SHIP_2_MAST_SUNK), new ImageView(SHIP_2_MAST_SUNK));
-        ships2mastsOpponent.setSpacing(38.0);
-        ships2mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-        HBox ships1mastsOpponent = new HBox(new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK));
-        ships1mastsOpponent.setSpacing(38.0);
-        ships1mastsOpponent.setAlignment(Pos.TOP_RIGHT);
-
-        // Player fleet
-        FlowPane fleetPlayer = new FlowPane(Orientation.VERTICAL);
-        fleetPlayer.setAlignment(Pos.TOP_LEFT);
-        fleetPlayer.setVgap(22.0);
-        fleetPlayer.setPrefWidth(312.0);
-        fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
 
         // MenuBar section
         ChoiceBox<String> difficultyLevelChoiceBox = new ChoiceBox<>();
@@ -139,12 +113,15 @@ public class BattleshipGame extends Application {
 //                    .forEach(System.out::println);
         });
         newGameButton.setOnAction(e -> controller.startNewGame());
-        loadButton.setOnAction(e -> controller.loadTotalScores());
+        loadButton.setOnAction(e -> {
+            controller.loadTotalScores();
+        });
         saveButton.setOnAction(e -> controller.saveTotalScores());
         startButton.setOnAction(e -> {
             if (controller.shipsArePlaced(true) && controller.shipsArePlaced(false)) {
                 controller.setPlayerTurn(true);
                 controller.setGameStarted(true);
+
                 controller.setDifficultyLevel(difficultyLevelChoiceBox.getValue());
                 menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
                 menuMiddleSection.getChildren().remove(randomButton);
@@ -177,19 +154,11 @@ public class BattleshipGame extends Application {
         menubar.setCenter(menuMiddleSection);
         menubar.setBottom(howToPlayButton);
 
-        // Opponent fleet
-        FlowPane fleetOpponent = new FlowPane(Orientation.VERTICAL);
-        fleetOpponent.setBorder(new Border(new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        fleetOpponent.setAlignment(Pos.TOP_RIGHT);
-        fleetOpponent.setVgap(22.0);
-        fleetOpponent.setPrefWidth(312.0);
-        fleetOpponent.getChildren().addAll(ships4mastsOpponent, ships3mastsOpponent, ships2mastsOpponent, ships1mastsOpponent);
 
         BorderPane middlePanel = new BorderPane();
-        middlePanel.setLeft(fleetPlayer);
+        middlePanel.setLeft(createPlayerFleetFlowPane());
         middlePanel.setCenter(menubar);
-        middlePanel.setRight(fleetOpponent);
+        middlePanel.setRight(createOpponentFleetFlowPane());
 
 //// --------------------------------------- Bottom Section -----------------------------------------
         controller.createPlaygroundGridPane(playerShips, playgroundGridPlayer,true);
@@ -277,6 +246,46 @@ public class BattleshipGame extends Application {
         playersNameVBox.setAlignment(position);
         playersNameVBox.setPrefWidth(180.0);
         return playersNameVBox;
+    }
+
+    private FlowPane createPlayerFleetFlowPane() {
+        HBox ships4masts = new HBox(SHIP_4_MAST);
+        HBox ships3masts = new HBox(new ImageView(SHIP_3_MAST), new ImageView(SHIP_3_MAST));
+        ships3masts.setSpacing(38.0);
+        HBox ships2masts = new HBox(new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST), new ImageView(SHIP_2_MAST));
+        ships2masts.setSpacing(38.0);
+        HBox ships1masts = new HBox(new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST), new ImageView(SHIP_1_MAST));
+        ships1masts.setSpacing(38.0);
+
+        FlowPane fleetPlayer = new FlowPane(Orientation.VERTICAL);
+        fleetPlayer.setAlignment(Pos.TOP_LEFT);
+        fleetPlayer.setVgap(22.0);
+        fleetPlayer.setPrefWidth(312.0);
+        fleetPlayer.getChildren().addAll(ships4masts, ships3masts, ships2masts, ships1masts);
+        return fleetPlayer;
+    }
+
+    private FlowPane createOpponentFleetFlowPane() {
+        HBox ships4mastsOpponent = new HBox(new ImageView(SHIP_4_MAST_SUNK));
+        ships4mastsOpponent.setAlignment(Pos.TOP_RIGHT);
+        HBox ships3mastsOpponent = new HBox(new ImageView(SHIP_3_MAST_SUNK), new ImageView(SHIP_3_MAST_SUNK));
+        ships3mastsOpponent.setSpacing(38.0);
+        ships3mastsOpponent.setAlignment(Pos.TOP_RIGHT);
+        HBox ships2mastsOpponent = new HBox(new ImageView(SHIP_2_MAST_SUNK), new ImageView(SHIP_2_MAST_SUNK), new ImageView(SHIP_2_MAST_SUNK));
+        ships2mastsOpponent.setSpacing(38.0);
+        ships2mastsOpponent.setAlignment(Pos.TOP_RIGHT);
+        HBox ships1mastsOpponent = new HBox(new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK), new ImageView(SHIP_1_MAST_SUNK));
+        ships1mastsOpponent.setSpacing(38.0);
+        ships1mastsOpponent.setAlignment(Pos.TOP_RIGHT);
+
+        FlowPane fleetOpponent = new FlowPane(Orientation.VERTICAL);
+        fleetOpponent.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        fleetOpponent.setAlignment(Pos.TOP_RIGHT);
+        fleetOpponent.setVgap(22.0);
+        fleetOpponent.setPrefWidth(312.0);
+        fleetOpponent.getChildren().addAll(ships4mastsOpponent, ships3mastsOpponent, ships2mastsOpponent, ships1mastsOpponent);
+        return fleetOpponent;
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,8 @@
 package pl.dysio9.battleship;
 
 import static pl.dysio9.battleship.Constants.*;
+
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,13 +10,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-
 
 public class Controller {
     private static Controller instance = null;
@@ -35,11 +39,13 @@ public class Controller {
     private Label menuLabel;
     private Label totalScorePlayerLabel;
     private Label totalScoreOpponentLabel;
+    private Label timerLabel;
     private Button randomButton;
     private Button startButton;
     private Button nextRoundButton;
     private Button surrenderButton;
     private BorderPane menuMiddleSection;
+
 
     public Controller() {
         // Exists only to defeat instantiation.
@@ -98,20 +104,36 @@ public class Controller {
     }
 
     public void addShip (Ship ship, boolean isPlayer) {
-//        ship.showAllCoordinates();
         for (int i = 0; i < ship.getMasts(); i++) {
             Cell cell = new Cell(ship.getXCoordinates(i), ship.getYCoordinates(i), ship, isPlayer);
             if (isPlayer) {
                 playerShips.put(cell, ship);
-                playgroundPlayerList.remove(cell);
-                playgroundPlayerList.add(cell);
+                replaceCellInPlayground(cell, true);
             } else {
                 opponentShips.put(cell, ship);
-                playgroundOpponentList.remove(cell);
-                playgroundOpponentList.add(cell);
+                replaceCellInPlayground(cell, false);
             }
         }
-//        fillCellsListWithTheShips(isPlayer);
+    }
+
+    public void replaceCellInPlayground(Cell cell, boolean isPlayer) {
+        if (isPlayer) {
+            ListIterator<Cell> iterator = playgroundPlayerList.listIterator();
+            while (iterator.hasNext()) {
+                Cell next = iterator.next();
+                if (next.equals(cell)) {
+                    iterator.set(cell);
+                }
+            }
+        } else {
+            ListIterator<Cell> iterator = playgroundOpponentList.listIterator();
+            while (iterator.hasNext()) {
+                Cell next = iterator.next();
+                if (next.equals(cell)) {
+                    iterator.set(cell);
+                }
+            }
+        }
     }
 
     public void fillCellsListWithEmptyCells(boolean player) {
@@ -195,127 +217,6 @@ public class Controller {
         }
     }
 
-    public List<Cell> getNeighbors(Ship ship, boolean player) {
-        List<Cell> neighbors = new ArrayList<>();
-        if (ship != null) {
-            for (int i = 1; i <= ship.getMasts(); i++) {
-                if (ship.isHorizontalPosition()) {
-                    switch (i) {
-                        case 4:
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 4, ship.getY(), player, true));
-                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() + 1, player, true));
-                            break;
-                        case 3:
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 3, ship.getY(), player, true));
-                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
-                            break;
-                        case 2:
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY(), player, true));
-                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
-                            break;
-                        case 1:
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
-                            break;
-                    }
-                    neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
-                } else {
-                    switch (i) {
-                        case 4:
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 4, player, true));
-                            neighbors.add(new Cell(ship.getX(), ship.getY() + 4, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 4, player, true));
-                            break;
-                        case 3:
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
-                            neighbors.add(new Cell(ship.getX(), ship.getY() + 3, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
-                            break;
-                        case 2:
-                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX(), ship.getY() + 2, player, true));
-                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
-                            break;
-                        case 1:
-                            neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
-                    }
-                }
-                neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
-            }
-            neighbors.add(new Cell(ship.getX() - 1, ship.getY() - 1, player, true));
-            neighbors.add(new Cell(ship.getX() - 1, ship.getY(), player, true));
-            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 1, player, true));
-            neighbors.add(new Cell(ship.getX(), ship.getY() - 1, player, true));
-            neighbors.add(new Cell(ship.getX() + 1, ship.getY() - 1, player, true));
-            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 1, player, true));
-        }
-        return neighbors.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
-    }
-
-    public List<Cell> getAllNeighbors(Map<Cell, Ship> shipsMap, boolean player) {
-        List<Ship> shipList = shipsMap.values().stream().collect(Collectors.toList());
-        List<Cell> neighborsAll = new ArrayList<>();
-
-        for (Ship ship : shipList) {
-            neighborsAll.addAll(getNeighbors(ship,player));
-        }
-
-        return neighborsAll.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
-    }
-
-    public List<Cell> getCellsToShot() {
-        System.out.println("first element shotHistory: " + shotsHistory.peekFirst());
-        System.out.println("last element shotHistory: " + shotsHistory.peekLast());
-
-        if (shotsHistory.isEmpty() || difficultyLevel == 1) {
-            return playgroundPlayerList.stream()
-                    .filter(cell -> !cell.wasEverShot())
-                    .collect(Collectors.toList());
-        } else if (shotsHistory.size() == 1) {
-            return !findNonDiagonalNeighbors(shotsHistory.peekLast()).isEmpty() ?
-                    findNonDiagonalNeighbors(shotsHistory.peekLast()) :
-                    playgroundPlayerList.stream()
-                            .filter(cell -> !cell.wasEverShot())
-                            .collect(Collectors.toList());
-        } else {
-            List<Cell> cellsToShotList = new ArrayList<>();
-            cellsToShotList.addAll(findNonDiagonalNeighbors(shotsHistory.peekFirst()));
-            cellsToShotList.addAll(findNonDiagonalNeighbors(shotsHistory.peekLast()));
-            System.out.println("cells to shot " + cellsToShotList);
-
-            if (shotsHistory.peekFirst().getValX() == shotsHistory.peekLast().getValX()) {
-                cellsToShotList = cellsToShotList.stream()
-                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
-                        .filter(cell -> !cell.wasEverShot())
-                        .filter(cell -> cell.getValX() == shotsHistory.peekLast().getValX())
-                        .collect(Collectors.toList());
-            } else if (shotsHistory.peekFirst().getValY() == shotsHistory.peekLast().getValY()) {
-                cellsToShotList = cellsToShotList.stream()
-                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
-                        .filter(cell -> !cell.wasEverShot())
-                        .filter(cell -> cell.getValY() == shotsHistory.peekLast().getValY())
-                        .collect(Collectors.toList());
-            }
-            return cellsToShotList.size() > 0 ? cellsToShotList : playgroundPlayerList.stream()
-                    .filter(cell -> !cell.wasEverShot())
-                    .collect(Collectors.toList());
-        }
-    }
-
     public boolean isValidCell(int x, int y) {
         return x >= 0 && x < 10 && y >= 0 && y < 10;
     }
@@ -370,6 +271,7 @@ public class Controller {
                         }
                     }
                 }
+                playgroundGrid.getChildren().remove(cell);
                 playgroundGrid.add(cell, cell.getValX(), cell.getValY());
         }
         playgroundGrid.setGridLinesVisible(true);
@@ -472,10 +374,10 @@ public class Controller {
 
     public void opponentShoot(double milliseconds) {
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(milliseconds), event -> {
-            List<Cell> playersHiddenFields;
-            Cell computerChoiceCell;
 
             if (gameStarted) {
+                List<Cell> playersHiddenFields;
+                Cell computerChoiceCell;
                 playersHiddenFields = getCellsToShot();
 
                 System.out.println("playerhiddenFields: " + playersHiddenFields);
@@ -557,18 +459,123 @@ public class Controller {
         return resultList;
     }
 
-    public void setNeighborsAsClicked(Ship ship) {
-        List<Cell> cellList = playgroundPlayerList.stream()
-                .filter(cell -> getNeighbors(ship,true).contains(cell))
-                .collect(Collectors.toList());
-
-        for (Cell c : cellList) {
-            if (!c.wasEverShot()) {
-                c.setClicked();
-                if (SHOW_SUNK_SHIPS_NEIGHBORS) {
-                    c.setFill(SHOT_NEGATIVE_IMAGE);
+    public List<Cell> getNeighbors(Ship ship, boolean player) {
+        List<Cell> neighbors = new ArrayList<>();
+        if (ship != null) {
+            for (int i = 1; i <= ship.getMasts(); i++) {
+                if (ship.isHorizontalPosition()) {
+                    switch (i) {
+                        case 4:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 4, ship.getY() + 1, player, true));
+                            break;
+                        case 3:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 3, ship.getY() + 1, player, true));
+                            break;
+                        case 2:
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() - 1, player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY(), player, true));
+                            neighbors.add(new Cell(ship.getX() + 2, ship.getY() + 1, player, true));
+                            break;
+                        case 1:
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
+                            break;
+                    }
+                    neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
+                } else {
+                    switch (i) {
+                        case 4:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 4, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 4, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 4, player, true));
+                            break;
+                        case 3:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 3, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 3, player, true));
+                            break;
+                        case 2:
+                            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 2, player, true));
+                            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 2, player, true));
+                            break;
+                        case 1:
+                            neighbors.add(new Cell(ship.getX(), ship.getY() + 1, player, true));
+                    }
                 }
+                neighbors.add(new Cell(ship.getX() + 1, ship.getY(), player, true));
             }
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY(), player, true));
+            neighbors.add(new Cell(ship.getX() - 1, ship.getY() + 1, player, true));
+            neighbors.add(new Cell(ship.getX(), ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() + 1, ship.getY() - 1, player, true));
+            neighbors.add(new Cell(ship.getX() + 1, ship.getY() + 1, player, true));
+        }
+        return neighbors.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
+    }
+
+    public List<Cell> getAllNeighbors(Map<Cell, Ship> shipsMap, boolean player) {
+        List<Ship> shipList = shipsMap.values().stream().collect(Collectors.toList());
+        List<Cell> neighborsAll = new ArrayList<>();
+
+        for (Ship ship : shipList) {
+            neighborsAll.addAll(getNeighbors(ship,player));
+        }
+
+        return neighborsAll.stream().filter(e -> isValidCell(e.getValX(), e.getValY())).collect(Collectors.toList());
+    }
+
+    public List<Cell> getCellsToShot() {
+        System.out.println("first element shotHistory: " + shotsHistory.peekFirst());
+        System.out.println("last element shotHistory: " + shotsHistory.peekLast());
+
+        if (shotsHistory.isEmpty() || difficultyLevel == 1) {
+            return playgroundPlayerList.stream()
+                    .filter(cell -> !cell.wasEverShot())
+                    .collect(Collectors.toList());
+        } else if (shotsHistory.size() == 1) {
+            return !findNonDiagonalNeighbors(shotsHistory.peekLast()).isEmpty() ?
+                    findNonDiagonalNeighbors(shotsHistory.peekLast()) :
+                    playgroundPlayerList.stream()
+                            .filter(cell -> !cell.wasEverShot())
+                            .collect(Collectors.toList());
+        } else {
+            List<Cell> cellsToShotList = new ArrayList<>();
+            cellsToShotList.addAll(findNonDiagonalNeighbors(shotsHistory.peekLast()));
+            System.out.println("cells to shot " + cellsToShotList);
+
+            if (shotsHistory.peekFirst().getValX() == shotsHistory.peekLast().getValX()) {
+                cellsToShotList = cellsToShotList.stream()
+                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
+                        .filter(cell -> !cell.wasEverShot())
+                        .filter(cell -> cell.getValX() == shotsHistory.peekLast().getValX())
+                        .collect(Collectors.toList());
+            } else if (shotsHistory.peekFirst().getValY() == shotsHistory.peekLast().getValY()) {
+                cellsToShotList = cellsToShotList.stream()
+                        .filter(cell -> isValidCell(cell.getValX(), cell.getValY()))
+                        .filter(cell -> !cell.wasEverShot())
+                        .filter(cell -> cell.getValY() == shotsHistory.peekLast().getValY())
+                        .collect(Collectors.toList());
+            }
+            return cellsToShotList.size() > 0 ? cellsToShotList : playgroundPlayerList.stream()
+                    .filter(cell -> !cell.wasEverShot())
+                    .collect(Collectors.toList());
         }
     }
 
@@ -588,8 +595,45 @@ public class Controller {
         return playgroundGridOpponent;
     }
 
+    public int getUnsunkCellsCount(boolean player) {
+        if (!player) {
+            return (int)playerShips.entrySet().stream()
+                    .filter(o -> o.getValue() != null)
+                    .filter(o -> !o.getValue().isSunk())
+                    .count();
+        } else {
+            return (int)opponentShips.entrySet().stream()
+                    .filter(o -> o.getValue() != null)
+                    .filter(o -> !o.getValue().isSunk())
+                    .count();
+        }
+    }
+
+    public int getTotalScorePlayer() {
+        return totalScorePlayer;
+    }
+
+    public int getTotalScoreOpponent() {
+        return totalScoreOpponent;
+    }
+
     public boolean isPlayerTurn() {
         return playerTurn;
+    }
+
+    public void setNeighborsAsClicked(Ship ship) {
+        List<Cell> cellList = playgroundPlayerList.stream()
+                .filter(cell -> getNeighbors(ship,true).contains(cell))
+                .collect(Collectors.toList());
+
+        for (Cell c : cellList) {
+            if (!c.wasEverShot()) {
+                c.setClicked();
+                if (SHOW_SUNK_SHIPS_NEIGHBORS) {
+                    c.setFill(SHOT_NEGATIVE_IMAGE);
+                }
+            }
+        }
     }
 
     public void setPlayerTurn(boolean playerTurn) {
@@ -598,42 +642,6 @@ public class Controller {
 
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
-    }
-
-    public void getDefaultMenuLabel() {
-        if (playerTurn) {
-            menuLabel.setText(MENU_LABEL_TEXT_PLAYER_TURN);
-        } else  {
-            menuLabel.setText(MENU_LABEL_TEXT_OPPONENT_TURN);
-        }
-    }
-
-    public int getUnsunkCellsCount(boolean player) {
-        if (!player) {
-//            System.out.println("statki" +(int)playerShips.entrySet().stream()
-//                    .filter(o -> o.getValue() != null)
-//                    .filter(o -> !o.getValue().isSunk())
-//                    .count());
-//            return (int)playgroundPlayerList.stream()
-//                    .filter(f -> f.isThereAShip())
-//                    .filter(f -> !f.wasEverShot())
-//                    .count();
-
-            return (int)playerShips.entrySet().stream()
-                    .filter(o -> o.getValue() != null)
-                    .filter(o -> !o.getValue().isSunk())
-                    .count();
-        } else {
-//            return (int)playgroundOpponentList.stream()
-//                    .filter(f -> f.isThereAShip())
-//                    .filter(f -> !f.wasEverShot())
-//                    .count();
-
-            return (int)opponentShips.entrySet().stream()
-                    .filter(o -> o.getValue() != null)
-                    .filter(o -> !o.getValue().isSunk())
-                    .count();
-        }
     }
 
     public void setRandomButton(Button randomButton) {
@@ -668,14 +676,6 @@ public class Controller {
         this.totalScoreOpponentLabel = totalScoreOpponentLabel;
     }
 
-    public int getTotalScorePlayer() {
-        return totalScorePlayer;
-    }
-
-    public int getTotalScoreOpponent() {
-        return totalScoreOpponent;
-    }
-
     public void setDifficultyLevel(String difficultyLevel) {
         if (difficultyLevel.equals("Difficulty: Easy")) {
             this.difficultyLevel = 1;
@@ -686,7 +686,6 @@ public class Controller {
 
     public void roundWin() {
         totalScorePlayer++;
-
         System.out.println("You Win the round! Your score: " + totalScorePlayer);
         totalScorePlayerLabel.setText(String.valueOf(totalScorePlayer));
         gameStarted = false;
@@ -697,8 +696,6 @@ public class Controller {
     }
 
     public void roundLost() {
-//        setPlayerTurn(!isPlayerTurn());
-//        playerTurn = true;
         totalScoreOpponent++;
         System.out.println("You've lost the round! Opponent score: " + totalScoreOpponent);
         totalScoreOpponentLabel.setText(String.valueOf(totalScoreOpponent));
@@ -727,7 +724,7 @@ public class Controller {
 
     public void saveTotalScores() {
         List<String> playgrounds = new ArrayList<>();
-        playgrounds.add("" + totalScorePlayer + " " + totalScoreOpponent);
+        playgrounds.add("" + totalScorePlayer + " " + totalScoreOpponent + " " + difficultyLevel);
         playgrounds.addAll(playgroundPlayerList.stream()
                 .map(e -> e.getValX() + " " + e.getValY() + " player(" + e.isPlayerCell() + ") wasClicked(" + e.wasEverShot() + ") isNeighbor(" + e.isNeighbor() + ") " + e.getShip())
                 .collect(Collectors.toList()));
@@ -768,6 +765,7 @@ public class Controller {
                 if (i == 0) {
                     totalScorePlayer = Integer.parseInt(splited[0]);
                     totalScoreOpponent = Integer.parseInt(splited[1]);
+                    difficultyLevel = Integer.parseInt(splited[2]);
                 } else {
                     isPlayers = splited[2].equals("player(true)");
                     if (splited[5].equals("null")) {
@@ -792,7 +790,15 @@ public class Controller {
                         if (splited[3].equals("wasClicked(true)")) {
                             cell.setClicked();
                         }
-                        addShip(ship,isPlayers);
+                        if (i > 0 && i <= 100) {
+                            playerShips.put(cell,ship);
+                            playgroundPlayerList.remove(cell);
+                            playgroundPlayerList.add(cell);
+                        } else {
+                            opponentShips.put(cell,ship);
+                            playgroundOpponentList.remove(cell);
+                            playgroundOpponentList.add(cell);
+                        }
                     }
                 }
             }
@@ -805,7 +811,8 @@ public class Controller {
             createPlaygroundGridPane(playerShips, playgroundGridPlayer, true);
             createPlaygroundGridPane(opponentShips, playgroundGridOpponent, false);
 
-            System.out.println("player:" + totalScorePlayer + " opponent: " + totalScoreOpponent);
+            System.out.println("player:" + totalScorePlayer + " opponent: " + totalScoreOpponent +
+                    " difficulty level: " + difficultyLevel);
             System.out.println("Mapa playerShips:");
             playerShips.entrySet().stream().forEach(System.out::println);
             System.out.println("PlaygroundPlayerList:");
