@@ -1,19 +1,13 @@
 package pl.dysio9.battleship;
 
-import static pl.dysio9.battleship.Constants.*;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
-
 import java.util.Objects;
 
-
 public class Cell extends Rectangle {
-    private Controller controller = Controller.getInstance();
-//    private Constants constants = Constants.getInstance();
-    private int x;
-    private int y;
-    private Ship ship;
-    private boolean isPlayerCell;
+    private final int x;
+    private final int y;
+    private final Ship ship;
+    private final boolean isPlayerCell;
     private boolean everShot = false;
     private boolean isNeighbor = false;
 
@@ -35,22 +29,6 @@ public class Cell extends Rectangle {
         setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
     }
 
-    public ImagePattern getCellFill() {
-        if (ship != null) {
-            if (everShot) {
-                return SHOT_POSITIVE_IMAGE;
-            } else {
-                return CELL_TRANSPARENT_IMAGE;
-            }
-        } else {
-            if (everShot) {
-                return SHOT_NEGATIVE_IMAGE;
-            } else {
-                return CELL_TRANSPARENT_IMAGE;
-            }
-        }
-    }
-
     public int getValX() {
         return x;
     }
@@ -65,10 +43,6 @@ public class Cell extends Rectangle {
 
     public Ship getShip() {
         return ship;
-    }
-
-    public Cell getCell(int x, int y) {
-        return this;
     }
 
     public boolean wasEverShot() {

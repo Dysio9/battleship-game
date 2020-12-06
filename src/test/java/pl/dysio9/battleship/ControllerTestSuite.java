@@ -12,7 +12,7 @@ public class ControllerTestSuite {
     void testFindNonDiagonalNeighbors() {
         //given
         Controller controller = new Controller();
-        controller.fillCellsListWithEmptyCells(true);
+        controller.fillPlaygroundWithEmptyCells(true);
 
         //when
         List<Cell> neighbors = controller.findNonDiagonalNeighbors(new Cell(5,5,true));
