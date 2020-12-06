@@ -1,8 +1,14 @@
 package pl.dysio9.battleship;
 
 import static pl.dysio9.battleship.Constants.*;
+
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -14,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.*;
 
@@ -23,12 +30,13 @@ public class BattleshipGame extends Application {
     private final Map<Cell, Ship> opponentShips = controller.getOpponentShips();
     private final GridPane playgroundGridPlayer = controller.getPlaygroundGridPlayer();
     private final GridPane playgroundGridOpponent = controller.getPlaygroundGridOpponent();
+    private final Timeline timeline = new Timeline();
+    private boolean colorChange = true;
     private Label menuLabel;
-    private  FlowPane menuMiddleSection;
-    Button randomButton;
-    Button startButton;
-    Button nextRoundButton;
-
+    private FlowPane menuMiddleSection;
+    private Button randomButton;
+    private Button startButton;
+    private Button nextRoundButton;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -212,6 +220,7 @@ public class BattleshipGame extends Application {
         controller.setNextRoundButton(nextRoundButton);
         nextRoundButton.setPrefSize(200, 22);
 
+        makeButtonBlink(randomButton);
 
         menuMiddleSection = new FlowPane(Orientation.HORIZONTAL);
         menuMiddleSection.setAlignment(Pos.TOP_RIGHT);
@@ -226,6 +235,7 @@ public class BattleshipGame extends Application {
             controller.placeShipsRandomly(false);
             controller.createPlaygroundGridPane(opponentShips, playgroundGridOpponent, false);
             menuLabel.setText(MENU_LABEL_TEXT_PLACED_SHIPS);
+            makeButtonsStopBlinking();
         });
         startButton.setOnAction(e -> {
             if (controller.shipsArePlaced(true) && controller.shipsArePlaced(false)) {
@@ -238,6 +248,7 @@ public class BattleshipGame extends Application {
             } else {
                 menuLabel.setText(MENU_LABEL_TEXT_DEFAULT);
             }
+            makeButtonBlink(randomButton);
         });
         surrenderButton.setOnAction(e -> {
             controller.setGameStarted(false);
@@ -255,6 +266,27 @@ public class BattleshipGame extends Application {
         });
 
         return menuMiddleSection;
+    }
+
+    private void makeButtonBlink(Button button) {
+        EventHandler<ActionEvent> on_finished = (ActionEvent event) -> {
+            if (colorChange) {
+                button.setStyle ("-fx-base: #f2f2f2");
+                colorChange = false;
+            } else {
+                button.setStyle ("-fx-base: #b9bbb6");
+                colorChange = true;
+            }
+        };
+        KeyFrame keyframe = new KeyFrame(Duration.millis(400), on_finished);
+
+        timeline.getKeyFrames().add(keyframe);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
+
+    private void makeButtonsStopBlinking() {
+        timeline.stop();
     }
 
     public static void main(String[] args) {

@@ -4,8 +4,8 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 
 public class Constants {
-    public static final boolean SHOW_OPPONENT_FLEET = true;
-    public static final boolean SHOW_NEIGHBORS = true;
+    public static final boolean SHOW_OPPONENT_FLEET = false;
+    public static final boolean SHOW_NEIGHBORS = false;
     public static final boolean SHOW_SUNK_SHIPS_NEIGHBORS = false;
     public static final int OPPONENT_DELAY = 500;
 
