@@ -11,11 +11,6 @@ public class Cell extends Rectangle {
     private boolean everShot = false;
     private boolean isNeighbor = false;
 
-    public Cell(int x, int y, boolean isPlayerCell, boolean isNeighbor) {
-        this(x,y,null, isPlayerCell);
-        this.isNeighbor = isNeighbor;
-    }
-
     public Cell(int x, int y, boolean isPlayerCell) {
         this(x,y,null, isPlayerCell);
     }
@@ -27,6 +22,12 @@ public class Cell extends Rectangle {
         this.ship = ship;
         this.isPlayerCell = isPlayerCell;
         setOnMouseClicked(e -> Controller.getInstance().cellClicked(this));
+    }
+
+    public static Cell createNeighborCell(int x, int y, boolean isPlayerCell){
+        Cell cell = new Cell(x, y, null, isPlayerCell);
+        cell.isNeighbor = true;
+        return cell;
     }
 
     public int getValX() {

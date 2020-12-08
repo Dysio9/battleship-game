@@ -25,6 +25,8 @@ import javafx.util.Duration;
 import java.util.*;
 
 public class BattleshipGame extends Application {
+    public static final String COLOR_BLUE = "-fx-base: #f2f2f2";
+    public static final String COLOR_WHITE = "-fx-base: #b9bbb6";
     private final Controller controller = Controller.getInstance();
     private final Map<Cell, Ship> playerShips = controller.getPlayerShips();
     private final Map<Cell, Ship> opponentShips = controller.getOpponentShips();
@@ -270,13 +272,8 @@ public class BattleshipGame extends Application {
 
     private void makeButtonBlink(Button button) {
         EventHandler<ActionEvent> on_finished = (ActionEvent event) -> {
-            if (colorChange) {
-                button.setStyle ("-fx-base: #f2f2f2");
-                colorChange = false;
-            } else {
-                button.setStyle ("-fx-base: #b9bbb6");
-                colorChange = true;
-            }
+            button.setStyle(colorChange ? COLOR_BLUE : COLOR_WHITE);
+            colorChange = !colorChange;
         };
         KeyFrame keyframe = new KeyFrame(Duration.millis(400), on_finished);
 

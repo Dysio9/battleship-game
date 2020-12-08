@@ -51,17 +51,15 @@ public class Ship {
 
     @Override
     public String toString() {
-        if (isHorizontalPosition()) {
-            return xArray[0] + " " + yArray[0] + " " + masts + " isHorizontal(true)";
-        } else {
-            return xArray[0] + " " + yArray[0] + " " + masts + " isHorizontal(false)";
-        }
+        return String.format("%s %s %s isHorizontal(%s)", xArray[0],yArray[0],masts, isHorizontalPosition());
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Ship ship = (Ship) o;
         return xArray[0] == ship.xArray[0] &&
                 yArray[0] == ship.yArray[0];
